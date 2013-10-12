@@ -27,6 +27,7 @@ THE SOFTWARE.
 
 #include "cocoa/CCDataVisitor.h"
 #include "ccMacros.h"
+#include "MemoryAlloctor.h"
 
 #ifdef EMSCRIPTEN
 #include <GLES2/gl2.h>
@@ -65,7 +66,7 @@ public:
     }
 };
 
-class CC_DLL Object
+class CC_DLL Object : public Memory::MemoryAllocator<Memory::NedPoolAllocPolicy>
 {
 public:
     /// object id, ScriptSupport need public _ID

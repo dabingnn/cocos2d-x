@@ -529,9 +529,7 @@
 		A03F25811780BAE8006731B9 /* CCAtlasNode.h in Headers */ = {isa = PBXBuildFile; fileRef = A03F1DF91780BAE4006731B9 /* CCAtlasNode.h */; };
 		A03F25821780BAE8006731B9 /* CCGLBufferedNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A03F1DFA1780BAE4006731B9 /* CCGLBufferedNode.cpp */; };
 		A03F25831780BAE8006731B9 /* CCGLBufferedNode.h in Headers */ = {isa = PBXBuildFile; fileRef = A03F1DFB1780BAE4006731B9 /* CCGLBufferedNode.h */; };
-		A03F25841780BAE8006731B9 /* CCNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A03F1DFC1780BAE4006731B9 /* CCNode.cpp */; };
 		A03F25851780BAE8006731B9 /* CCNode.h in Headers */ = {isa = PBXBuildFile; fileRef = A03F1DFD1780BAE4006731B9 /* CCNode.h */; };
-		A03F25861780BAE8006731B9 /* CCCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A03F1DFE1780BAE4006731B9 /* CCCamera.cpp */; };
 		A03F25871780BAE8006731B9 /* CCCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = A03F1DFF1780BAE4006731B9 /* CCCamera.h */; };
 		A03F25881780BAE8006731B9 /* CCConfiguration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A03F1E001780BAE4006731B9 /* CCConfiguration.cpp */; };
 		A03F25891780BAE8006731B9 /* CCConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = A03F1E011780BAE4006731B9 /* CCConfiguration.h */; };
@@ -2198,6 +2196,9 @@
 		B3D8DD63179922F30039C204 /* libtiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3D8DD5F179922F30039C204 /* libtiff.a */; };
 		B3D8DD64179922F30039C204 /* libwebp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B3D8DD60179922F30039C204 /* libwebp.a */; };
 		ED255CDE17CDC8A10029A42B /* libglfw3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ED255CDD17CDC8A10029A42B /* libglfw3.a */; };
+		ED5F4E321808F01C00EDB478 /* MemoryAlloctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5F4E241808E1A200EDB478 /* MemoryAlloctor.cpp */; };
+		ED5F4E331808F05C00EDB478 /* MemoryAlloctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ED5F4E241808E1A200EDB478 /* MemoryAlloctor.cpp */; };
+		ED5F4E341808F06200EDB478 /* nedmalloc.c in Sources */ = {isa = PBXBuildFile; fileRef = ED5F4E2D1808EE0900EDB478 /* nedmalloc.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -3624,6 +3625,13 @@
 		B3D8DD5F179922F30039C204 /* libtiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtiff.a; path = cocos2dx/platform/third_party/mac/libraries/libtiff.a; sourceTree = "<group>"; };
 		B3D8DD60179922F30039C204 /* libwebp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libwebp.a; path = cocos2dx/platform/third_party/mac/libraries/libwebp.a; sourceTree = "<group>"; };
 		ED255CDD17CDC8A10029A42B /* libglfw3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libglfw3.a; path = cocos2dx/platform/third_party/mac/libraries/libglfw3.a; sourceTree = "<group>"; };
+		ED5F4E241808E1A200EDB478 /* MemoryAlloctor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryAlloctor.cpp; sourceTree = "<group>"; };
+		ED5F4E251808E1A200EDB478 /* MemoryAlloctor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryAlloctor.h; sourceTree = "<group>"; };
+		ED5F4E2B1808EE0900EDB478 /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
+		ED5F4E2C1808EE0900EDB478 /* malloc.c.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = malloc.c.h; sourceTree = "<group>"; };
+		ED5F4E2D1808EE0900EDB478 /* nedmalloc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = nedmalloc.c; sourceTree = "<group>"; };
+		ED5F4E2E1808EE0900EDB478 /* nedmalloc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nedmalloc.h; sourceTree = "<group>"; };
+		ED5F4E2F1808EE0900EDB478 /* Readme.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Readme.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -4441,6 +4449,9 @@
 		A03F1E081780BAE4006731B9 /* cocoa */ = {
 			isa = PBXGroup;
 			children = (
+				ED5F4E2A1808EE0900EDB478 /* nedmalloc */,
+				ED5F4E241808E1A200EDB478 /* MemoryAlloctor.cpp */,
+				ED5F4E251808E1A200EDB478 /* MemoryAlloctor.h */,
 				A03F1E091780BAE4006731B9 /* CCAffineTransform.cpp */,
 				A03F1E0A1780BAE4006731B9 /* CCAffineTransform.h */,
 				A03F1E0B1780BAE4006731B9 /* CCArray.cpp */,
@@ -6207,6 +6218,18 @@
 			name = ios;
 			sourceTree = "<group>";
 		};
+		ED5F4E2A1808EE0900EDB478 /* nedmalloc */ = {
+			isa = PBXGroup;
+			children = (
+				ED5F4E2B1808EE0900EDB478 /* License.txt */,
+				ED5F4E2C1808EE0900EDB478 /* malloc.c.h */,
+				ED5F4E2D1808EE0900EDB478 /* nedmalloc.c */,
+				ED5F4E2E1808EE0900EDB478 /* nedmalloc.h */,
+				ED5F4E2F1808EE0900EDB478 /* Readme.txt */,
+			);
+			path = nedmalloc;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -7903,8 +7926,6 @@
 				A03F257E1780BAE8006731B9 /* CCActionTween.cpp in Sources */,
 				A03F25801780BAE8006731B9 /* CCAtlasNode.cpp in Sources */,
 				A03F25821780BAE8006731B9 /* CCGLBufferedNode.cpp in Sources */,
-				A03F25841780BAE8006731B9 /* CCNode.cpp in Sources */,
-				A03F25861780BAE8006731B9 /* CCCamera.cpp in Sources */,
 				A03F25881780BAE8006731B9 /* CCConfiguration.cpp in Sources */,
 				A03F258A1780BAE8006731B9 /* CCDirector.cpp in Sources */,
 				A03F258C1780BAE8006731B9 /* ccFPSImages.c in Sources */,
@@ -8019,6 +8040,7 @@
 				A07A4DF91783815B0073F6A7 /* CCDevice.mm in Sources */,
 				A07A4DFB1783815B0073F6A7 /* CCDirectorCaller.mm in Sources */,
 				A07A4DFD1783815B0073F6A7 /* CCEGLView.mm in Sources */,
+				ED5F4E321808F01C00EDB478 /* MemoryAlloctor.cpp in Sources */,
 				A07A4DFF1783815B0073F6A7 /* CCEventDispatcher.mm in Sources */,
 				A07A4E031783815B0073F6A7 /* CCImage.mm in Sources */,
 				A07A4E081783815B0073F6A7 /* CCWindow.m in Sources */,
@@ -8491,8 +8513,10 @@
 				A07A4C901783777C0073F6A7 /* CCVertex.cpp in Sources */,
 				A07A4C911783777C0073F6A7 /* CCComponent.cpp in Sources */,
 				A07A4C921783777C0073F6A7 /* CCComponentContainer.cpp in Sources */,
+				ED5F4E341808F06200EDB478 /* nedmalloc.c in Sources */,
 				A07A4C931783777C0073F6A7 /* ccCArray.cpp in Sources */,
 				B309702817E2E3F600B0912C /* CCPhysicsJointInfo.cpp in Sources */,
+				ED5F4E331808F05C00EDB478 /* MemoryAlloctor.cpp in Sources */,
 				A07A4C941783777C0073F6A7 /* TGAlib.cpp in Sources */,
 				A07A4C951783777C0073F6A7 /* tinyxml2.cpp in Sources */,
 				A07A4C961783777C0073F6A7 /* TransformUtils.cpp in Sources */,
