@@ -59,7 +59,7 @@ public:
     PerformanceMathLayer2(bool bControlMenuVisible, int nMaxCases = 0, int nCurCase = 0):
     PerformanceMathLayer(bControlMenuVisible, nMaxCases, nCurCase)
     {
-        
+        _profileName = "profile_MatTransformVec4";
     }
     
     virtual void doPerformanceTest(float dt) override;
