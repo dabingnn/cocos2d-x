@@ -39,6 +39,70 @@ using std::min;
 using std::max;
 
 namespace spine {
+    
+SkeletonBatchedNode* SkeletonBatchedNode::create()
+{
+    auto result = new (std::nothrow) SkeletonBatchedNode();
+    if(result)
+    {
+        result->autorelease();
+        return result;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+void SkeletonBatchedNode::update (float deltaTime)
+{
+}
+
+void SkeletonBatchedNode::draw (cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t transformFlags)
+{
+    _drawCommand.init(_globalZOrder);
+    _drawCommand.func = CC_CALLBACK_0(SkeletonBatchedNode::onDraw,this,transform,transformFlags);
+    renderer->addCommand(&_drawCommand);
+}
+
+void SkeletonBatchedNode::visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags)
+{
+    if (! _visible)
+    {
+        return;
+    }
+    
+    sortAllChildren();
+    
+    uint32_t flags = processParentFlags(parentTransform, parentFlags);
+    
+    draw(renderer, _modelViewTransform, flags);
+}
+
+void SkeletonBatchedNode::onDraw(const cocos2d::Mat4 &transform, uint32_t transformFlags)
+{
+    getGLProgramState()->apply(transform);
+    
+    for (auto child : _children) {
+        SkeletonRenderer *skeletonNode = static_cast<SkeletonRenderer*>(child);
+        if (skeletonNode) {
+            skeletonNode->fillPolygonBatch(_batch);
+        }
+    }
+    _batch->flush();
+}
+
+SkeletonBatchedNode::SkeletonBatchedNode()
+{
+    _batch = PolygonBatch::createWithCapacity(10000);
+    _batch->retain();
+    setGLProgram(ShaderCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP));
+}
+
+SkeletonBatchedNode::~SkeletonBatchedNode()
+{
+    CC_SAFE_RELEASE_NULL(_batch);
+}
 
 static const int quadTriangles[6] = {0, 1, 2, 2, 3, 0};
 
@@ -139,6 +203,92 @@ void SkeletonRenderer::draw (Renderer* renderer, const Mat4& transform, uint32_t
 	renderer->addCommand(&_drawCommand);
 }
 
+void SkeletonRenderer::fillPolygonBatch(PolygonBatch *batch)
+{
+    Color3B nodeColor = getColor();
+	_skeleton->r = nodeColor.r / (float)255;
+	_skeleton->g = nodeColor.g / (float)255;
+	_skeleton->b = nodeColor.b / (float)255;
+	_skeleton->a = getDisplayedOpacity() / (float)255;
+    
+	Color4B color;
+	const float* uvs = nullptr;
+	int verticesCount = 0;
+	const int* triangles = nullptr;
+	int trianglesCount = 0;
+	float r = 0, g = 0, b = 0, a = 0;
+    Mat4 toParentTM = getNodeToWorldTransform();
+	for (int i = 0, n = _skeleton->slotCount; i < n; i++)
+    {
+		spSlot* slot = _skeleton->drawOrder[i];
+		if (!slot->attachment) continue;
+		Texture2D *texture = nullptr;
+		switch (slot->attachment->type) {
+            case SP_ATTACHMENT_REGION: {
+                spRegionAttachment* attachment = (spRegionAttachment*)slot->attachment;
+                spRegionAttachment_computeWorldVertices(attachment, slot->skeleton->x, slot->skeleton->y, slot->bone, _worldVertices);
+                texture = getTexture(attachment);
+                uvs = attachment->uvs;
+                verticesCount = 8;
+                triangles = quadTriangles;
+                trianglesCount = 6;
+                r = attachment->r;
+                g = attachment->g;
+                b = attachment->b;
+                a = attachment->a;
+                break;
+            }
+            case SP_ATTACHMENT_MESH: {
+                spMeshAttachment* attachment = (spMeshAttachment*)slot->attachment;
+                spMeshAttachment_computeWorldVertices(attachment, slot->skeleton->x, slot->skeleton->y, slot, _worldVertices);
+                texture = getTexture(attachment);
+                uvs = attachment->uvs;
+                verticesCount = attachment->verticesCount;
+                triangles = attachment->triangles;
+                trianglesCount = attachment->trianglesCount;
+                r = attachment->r;
+                g = attachment->g;
+                b = attachment->b;
+                a = attachment->a;
+                break;
+            }
+            case SP_ATTACHMENT_SKINNED_MESH: {
+                spSkinnedMeshAttachment* attachment = (spSkinnedMeshAttachment*)slot->attachment;
+                spSkinnedMeshAttachment_computeWorldVertices(attachment, slot->skeleton->x, slot->skeleton->y, slot, _worldVertices);
+                texture = getTexture(attachment);
+                uvs = attachment->uvs;
+                verticesCount = attachment->uvsCount;
+                triangles = attachment->triangles;
+                trianglesCount = attachment->trianglesCount;
+                r = attachment->r;
+                g = attachment->g;
+                b = attachment->b;
+                a = attachment->a;
+                break;
+            }
+            default: ;
+		}
+		if (texture) {
+            cocos2d::BlendFunc blend(_blendFunc);
+            blend.dst = slot->data->additiveBlending ? GL_ONE : _blendFunc.dst;
+			color.a = _skeleton->a * slot->a * a * 255;
+			float multiplier = _premultipliedAlpha ? color.a : 255;
+			color.r = _skeleton->r * slot->r * r * multiplier;
+			color.g = _skeleton->g * slot->g * g * multiplier;
+			color.b = _skeleton->b * slot->b * b * multiplier;
+            for (int vi = 0; vi < verticesCount; vi += 2, ++verticesCount)
+            {
+                float x = _worldVertices[vi];
+                float y = _worldVertices[vi + 1];
+                
+                _worldVertices[vi] = x * (toParentTM.m)[0] + y * (toParentTM.m)[4] +  (toParentTM.m)[12];
+                _worldVertices[vi + 1] = x * (toParentTM.m)[1] + y * (toParentTM.m)[5] +  (toParentTM.m)[13];
+            }
+			batch->add(texture, _worldVertices, uvs, verticesCount, triangles, trianglesCount, &color, blend);
+		}
+    }
+}
+
 void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFlags) {
 
 	getGLProgramState()->apply(transform);
@@ -149,7 +299,6 @@ void SkeletonRenderer::drawSkeleton (const Mat4 &transform, uint32_t transformFl
 	_skeleton->b = nodeColor.b / (float)255;
 	_skeleton->a = getDisplayedOpacity() / (float)255;
 
-	int additive = -1;
 	Color4B color;
 	const float* uvs = nullptr;
 	int verticesCount = 0;

@@ -242,6 +242,9 @@ bool SpineTestPerformanceLayer::init () {
     
 	scheduleUpdate();
 	
+    auto batchNode = SkeletonBatchedNode::create();
+    this->addChild(batchNode, 0, 105);
+    
 	EventListenerTouchOneByOne* listener = EventListenerTouchOneByOne::create();
 	listener->onTouchBegan = [this] (Touch* touch, Event* event) -> bool
     {
@@ -253,12 +256,18 @@ bool SpineTestPerformanceLayer::init () {
         
         skeletonNode->setScale(0.2);
         skeletonNode->setPosition(pos);
-        addChild(skeletonNode);
+        getSpineParent()->addChild(skeletonNode);
         return true;
 	};
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
     
 	return true;
+}
+
+Node* SpineTestPerformanceLayer::getSpineParent()
+{
+    return getChildByTag(105);
+    return this;
 }
 
 void SpineTestPerformanceLayer::update (float deltaTime) {

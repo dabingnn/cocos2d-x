@@ -37,6 +37,24 @@
 namespace spine {
 
 class PolygonBatch;
+class SkeletonRenderer;
+
+class SkeletonBatchedNode : public cocos2d::Node
+{
+public:
+    static SkeletonBatchedNode* create();
+    virtual void update (float deltaTime) override;
+    virtual void draw (cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t transformFlags) override;
+    virtual void visit(cocos2d::Renderer *renderer, const cocos2d::Mat4 &parentTransform, uint32_t parentFlags) override;
+
+    void onDraw(const cocos2d::Mat4& transform, uint32_t transformFlags);
+protected:
+    SkeletonBatchedNode();
+    virtual ~SkeletonBatchedNode();
+protected:
+    cocos2d::CustomCommand _drawCommand;
+    PolygonBatch* _batch;
+};
 
 /** Draws a skeleton. */
 class SkeletonRenderer: public cocos2d::Node, public cocos2d::BlendProtocol {
@@ -48,6 +66,10 @@ public:
 	virtual void update (float deltaTime) override;
 	virtual void draw (cocos2d::Renderer* renderer, const cocos2d::Mat4& transform, uint32_t transformFlags) override;
 	virtual void drawSkeleton (const cocos2d::Mat4& transform, uint32_t transformFlags);
+
+    //called by SkeletonBatchedNode
+    void fillPolygonBatch(PolygonBatch* batch);
+    
 	virtual cocos2d::Rect getBoundingBox () const override;
 
 	// --- Convenience methods for common Skeleton_* functions.

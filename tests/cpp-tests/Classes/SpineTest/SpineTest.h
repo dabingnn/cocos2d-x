@@ -118,6 +118,8 @@ public:
     //    void animationStateEvent (spine::SkeletonAnimation* node, int trackIndex, spEventType type, spEvent* event, int loopCount);
     
 	CREATE_FUNC (SpineTestPerformanceLayer);
+protected:
+    Node* getSpineParent();
 };
 
 #endif // _EXAMPLELAYER_H_
