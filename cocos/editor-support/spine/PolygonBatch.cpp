@@ -46,7 +46,7 @@ PolygonBatch::PolygonBatch () :
 	_capacity(0),
 	_vertices(nullptr), _verticesCount(0),
 	_triangles(nullptr), _trianglesCount(0),
-	_texture(nullptr)
+	_texture(nullptr), _blend(BlendFunc::DISABLE)
 {}
 
 bool PolygonBatch::initWithCapacity (ssize_t capacity) {
@@ -67,14 +67,15 @@ PolygonBatch::~PolygonBatch () {
 void PolygonBatch::add (const Texture2D* addTexture,
 		const float* addVertices, const float* uvs, int addVerticesCount,
 		const int* addTriangles, int addTrianglesCount,
-		Color4B* color) {
+		Color4B* color, const cocos2d::BlendFunc blend) {
 
 	if (
         addTexture != _texture
 		|| _verticesCount + (addVerticesCount >> 1) > _capacity
-		|| _trianglesCount + addTrianglesCount > _capacity * 3) {
+		|| _trianglesCount + addTrianglesCount > _capacity * 3 || !(blend == _blend)) {
 		this->flush();
 		_texture = addTexture;
+        _blend = blend;
 	}
 
 	for (int i = 0; i < addTrianglesCount; ++i, ++_trianglesCount)
@@ -94,6 +95,7 @@ void PolygonBatch::flush () {
 	if (!_verticesCount) return;
 
 	GL::bindTexture2D(_texture->getName());
+    GL::blendFunc(_blend.src, _blend.dst);
 	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
 	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
 	glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORDS);
