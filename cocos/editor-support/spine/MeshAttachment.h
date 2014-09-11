@@ -1,10 +1,10 @@
 /******************************************************************************
  * Spine Runtimes Software License
  * Version 2.1
- * 
+ *
  * Copyright (c) 2013, Esoteric Software
  * All rights reserved.
- * 
+ *
  * You are granted a perpetual, non-exclusive, non-sublicensable and
  * non-transferable license to install, execute and perform the Spine Runtimes
  * Software (the "Software") solely for internal use. Without the written
@@ -15,7 +15,7 @@
  * trademark, patent or other intellectual property or proprietary rights
  * notices on or in the Software, including any copy thereof. Redistributions
  * in binary or source form must include this license and terms.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY ESOTERIC SOFTWARE "AS IS" AND ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -28,47 +28,60 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_SKIN_H_
-#define SPINE_SKIN_H_
+#ifndef SPINE_MESHATTACHMENT_H_
+#define SPINE_MESHATTACHMENT_H_
 
 #include <spine/Attachment.h>
+#include <spine/Atlas.h>
+#include <spine/Slot.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct spSkeleton;
+typedef struct spMeshAttachment spMeshAttachment;
+struct spMeshAttachment {
+	spAttachment super;
+	const char* path;
 
-typedef struct {
-	const char* const name;
-} spSkin;
+	int verticesCount;
+	float* vertices;
+	int hullLength;
 
-spSkin* spSkin_create (const char* name);
-void spSkin_dispose (spSkin* self);
+	float* regionUVs;
+	float* uvs;
 
-/* The Skin owns the attachment. */
-void spSkin_addAttachment (spSkin* self, int slotIndex, const char* name, spAttachment* attachment);
-/* Returns 0 if the attachment was not found. */
-spAttachment* spSkin_getAttachment (const spSkin* self, int slotIndex, const char* name);
+	int trianglesCount;
+	int* triangles;
 
-/* Returns 0 if the slot or attachment was not found. */
-const char* spSkin_getAttachmentName (const spSkin* self, int slotIndex, int attachmentIndex);
+	float r, g, b, a;
 
-/** Attach each attachment in this skin if the corresponding attachment in oldSkin is currently attached. */
-void spSkin_attachAll (const spSkin* self, struct spSkeleton* skeleton, const spSkin* oldspSkin);
+	void* rendererObject;
+	int regionOffsetX, regionOffsetY; /* Pixels stripped from the bottom left, unrotated. */
+	int regionWidth, regionHeight; /* Unrotated, stripped pixel size. */
+	int regionOriginalWidth, regionOriginalHeight; /* Unrotated, unstripped pixel size. */
+	float regionU, regionV, regionU2, regionV2;
+	int/*bool*/regionRotate;
+
+	/* Nonessential. */
+	int edgesCount;
+	int* edges;
+	float width, height;
+};
+
+spMeshAttachment* spMeshAttachment_create (const char* name);
+void spMeshAttachment_updateUVs (spMeshAttachment* self);
+void spMeshAttachment_computeWorldVertices (spMeshAttachment* self, float x, float y, spSlot* slot, float* worldVertices);
 
 #ifdef SPINE_SHORT_NAMES
-typedef spSkin Skin;
-#define Skin_create(...) spSkin_create(__VA_ARGS__)
-#define Skin_dispose(...) spSkin_dispose(__VA_ARGS__)
-#define Skin_addAttachment(...) spSkin_addAttachment(__VA_ARGS__)
-#define Skin_getAttachment(...) spSkin_getAttachment(__VA_ARGS__)
-#define Skin_getAttachmentName(...) spSkin_getAttachmentName(__VA_ARGS__)
-#define Skin_attachAll(...) spSkin_attachAll(__VA_ARGS__)
+typedef spMeshAttachment MeshAttachment;
+#define MeshAttachment_create(...) spMeshAttachment_create(__VA_ARGS__)
+#define MeshAttachment_updateUVs(...) spMeshAttachment_updateUVs(__VA_ARGS__)
+#define MeshAttachment_computeWorldVertices(...) spMeshAttachment_computeWorldVertices(__VA_ARGS__)
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SPINE_SKIN_H_ */
+#endif /* SPINE_MESHATTACHMENT_H_ */

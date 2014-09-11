@@ -28,47 +28,36 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_SKIN_H_
-#define SPINE_SKIN_H_
+#ifndef SPINE_POLYGONBATCH_H_
+#define SPINE_POLYGONBATCH_H_
 
-#include <spine/Attachment.h>
+#include "cocos2d.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace spine {
 
-struct spSkeleton;
+class PolygonBatch : public cocos2d::Ref {
+public:
+	static PolygonBatch* createWithCapacity (ssize_t capacity);
 
-typedef struct {
-	const char* const name;
-} spSkin;
+	void add (const cocos2d::Texture2D* texture,
+		const float* vertices, const float* uvs, int verticesCount,
+		const int* triangles, int trianglesCount,
+		cocos2d::Color4B* color);
+	void flush ();
 
-spSkin* spSkin_create (const char* name);
-void spSkin_dispose (spSkin* self);
+protected:
+	PolygonBatch();
+	virtual ~PolygonBatch();
+	bool initWithCapacity (ssize_t capacity);
 
-/* The Skin owns the attachment. */
-void spSkin_addAttachment (spSkin* self, int slotIndex, const char* name, spAttachment* attachment);
-/* Returns 0 if the attachment was not found. */
-spAttachment* spSkin_getAttachment (const spSkin* self, int slotIndex, const char* name);
+	ssize_t _capacity;
+	cocos2d::V2F_C4B_T2F* _vertices;
+	int _verticesCount;
+	GLushort* _triangles;
+	int _trianglesCount;
+	const cocos2d::Texture2D* _texture;
+};
 
-/* Returns 0 if the slot or attachment was not found. */
-const char* spSkin_getAttachmentName (const spSkin* self, int slotIndex, int attachmentIndex);
-
-/** Attach each attachment in this skin if the corresponding attachment in oldSkin is currently attached. */
-void spSkin_attachAll (const spSkin* self, struct spSkeleton* skeleton, const spSkin* oldspSkin);
-
-#ifdef SPINE_SHORT_NAMES
-typedef spSkin Skin;
-#define Skin_create(...) spSkin_create(__VA_ARGS__)
-#define Skin_dispose(...) spSkin_dispose(__VA_ARGS__)
-#define Skin_addAttachment(...) spSkin_addAttachment(__VA_ARGS__)
-#define Skin_getAttachment(...) spSkin_getAttachment(__VA_ARGS__)
-#define Skin_getAttachmentName(...) spSkin_getAttachmentName(__VA_ARGS__)
-#define Skin_attachAll(...) spSkin_attachAll(__VA_ARGS__)
-#endif
-
-#ifdef __cplusplus
 }
-#endif
 
-#endif /* SPINE_SKIN_H_ */
+#endif // SPINE_POLYGONBATCH_H_

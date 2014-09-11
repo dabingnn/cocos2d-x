@@ -28,30 +28,59 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_SPINE_H_
-#define SPINE_SPINE_H_
-
-#include <spine/Animation.h>
-#include <spine/AnimationState.h>
-#include <spine/AnimationStateData.h>
-#include <spine/Atlas.h>
-#include <spine/AtlasAttachmentLoader.h>
-#include <spine/Attachment.h>
-#include <spine/AttachmentLoader.h>
-#include <spine/Bone.h>
-#include <spine/BoneData.h>
-#include <spine/RegionAttachment.h>
 #include <spine/MeshAttachment.h>
-#include <spine/SkinnedMeshAttachment.h>
-#include <spine/BoundingBoxAttachment.h>
-#include <spine/Skeleton.h>
-#include <spine/SkeletonBounds.h>
-#include <spine/SkeletonData.h>
-#include <spine/SkeletonJson.h>
-#include <spine/Skin.h>
-#include <spine/Slot.h>
-#include <spine/SlotData.h>
-#include <spine/Event.h>
-#include <spine/EventData.h>
+#include <spine/extension.h>
 
-#endif /* SPINE_SPINE_H_ */
+void _spMeshAttachment_dispose (spAttachment* attachment) {
+	spMeshAttachment* self = SUB_CAST(spMeshAttachment, attachment);
+	_spAttachment_deinit(attachment);
+	FREE(self->path);
+	FREE(self->vertices);
+	FREE(self->regionUVs);
+	FREE(self->uvs);
+	FREE(self->triangles);
+	FREE(self->edges);
+	FREE(self);
+}
+
+spMeshAttachment* spMeshAttachment_create (const char* name) {
+	spMeshAttachment* self = NEW(spMeshAttachment);
+	self->r = 1;
+	self->g = 1;
+	self->b = 1;
+	self->a = 1;
+	_spAttachment_init(SUPER(self), name, SP_ATTACHMENT_MESH, _spMeshAttachment_dispose);
+	return self;
+}
+
+void spMeshAttachment_updateUVs (spMeshAttachment* self) {
+	int i;
+	float width = self->regionU2 - self->regionU, height = self->regionV2 - self->regionV;
+	FREE(self->uvs);
+	self->uvs = MALLOC(float, self->verticesCount);
+	if (self->regionRotate) {
+		for (i = 0; i < self->verticesCount; i += 2) {
+			self->uvs[i] = self->regionU + self->regionUVs[i + 1] * width;
+			self->uvs[i + 1] = self->regionV + height - self->regionUVs[i] * height;
+		}
+	} else {
+		for (i = 0; i < self->verticesCount; i += 2) {
+			self->uvs[i] = self->regionU + self->regionUVs[i] * width;
+			self->uvs[i + 1] = self->regionV + self->regionUVs[i + 1] * height;
+		}
+	}
+}
+
+void spMeshAttachment_computeWorldVertices (spMeshAttachment* self, float x, float y, spSlot* slot, float* worldVertices) {
+	int i;
+	float* vertices = self->vertices;
+	const spBone* bone = slot->bone;
+	x += bone->worldX;
+	y += bone->worldY;
+	if (slot->attachmentVerticesCount == self->verticesCount) vertices = slot->attachmentVertices;
+	for (i = 0; i < self->verticesCount; i += 2) {
+		const float vx = vertices[i], vy = vertices[i + 1];
+		worldVertices[i] = vx * bone->m00 + vy * bone->m01 + x;
+		worldVertices[i + 1] = vx * bone->m10 + vy * bone->m11 + y;
+	}
+}

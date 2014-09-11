@@ -28,47 +28,30 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_SKIN_H_
-#define SPINE_SKIN_H_
+#include <spine/SlotData.h>
+#include <spine/extension.h>
 
-#include <spine/Attachment.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct spSkeleton;
-
-typedef struct {
-	const char* const name;
-} spSkin;
-
-spSkin* spSkin_create (const char* name);
-void spSkin_dispose (spSkin* self);
-
-/* The Skin owns the attachment. */
-void spSkin_addAttachment (spSkin* self, int slotIndex, const char* name, spAttachment* attachment);
-/* Returns 0 if the attachment was not found. */
-spAttachment* spSkin_getAttachment (const spSkin* self, int slotIndex, const char* name);
-
-/* Returns 0 if the slot or attachment was not found. */
-const char* spSkin_getAttachmentName (const spSkin* self, int slotIndex, int attachmentIndex);
-
-/** Attach each attachment in this skin if the corresponding attachment in oldSkin is currently attached. */
-void spSkin_attachAll (const spSkin* self, struct spSkeleton* skeleton, const spSkin* oldspSkin);
-
-#ifdef SPINE_SHORT_NAMES
-typedef spSkin Skin;
-#define Skin_create(...) spSkin_create(__VA_ARGS__)
-#define Skin_dispose(...) spSkin_dispose(__VA_ARGS__)
-#define Skin_addAttachment(...) spSkin_addAttachment(__VA_ARGS__)
-#define Skin_getAttachment(...) spSkin_getAttachment(__VA_ARGS__)
-#define Skin_getAttachmentName(...) spSkin_getAttachmentName(__VA_ARGS__)
-#define Skin_attachAll(...) spSkin_attachAll(__VA_ARGS__)
-#endif
-
-#ifdef __cplusplus
+spSlotData* spSlotData_create (const char* name, spBoneData* boneData) {
+	spSlotData* self = NEW(spSlotData);
+	MALLOC_STR(self->name, name);
+	CONST_CAST(spBoneData*, self->boneData) = boneData;
+	self->r = 1;
+	self->g = 1;
+	self->b = 1;
+	self->a = 1;
+	return self;
 }
-#endif
 
-#endif /* SPINE_SKIN_H_ */
+void spSlotData_dispose (spSlotData* self) {
+	FREE(self->name);
+	FREE(self->attachmentName);
+	FREE(self);
+}
+
+void spSlotData_setAttachmentName (spSlotData* self, const char* attachmentName) {
+	FREE(self->attachmentName);
+	if (attachmentName)
+		MALLOC_STR(self->attachmentName, attachmentName);
+	else
+		CONST_CAST(char*, self->attachmentName) = 0;
+}

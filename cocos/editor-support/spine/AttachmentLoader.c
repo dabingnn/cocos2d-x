@@ -28,45 +28,54 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_ATTACHMENTLOADER_H_
-#define SPINE_ATTACHMENTLOADER_H_
+#include <spine/AttachmentLoader.h>
+#include <stdio.h>
+#include <spine/extension.h>
 
-#include <spine/Attachment.h>
-#include <spine/Skin.h>
+typedef struct _spAttachmentLoaderVtable {
+	spAttachment* (*newAttachment) (spAttachmentLoader* self, spSkin* skin, spAttachmentType type, const char* name,
+			const char* path);
+	void (*dispose) (spAttachmentLoader* self);
+} _spAttachmentLoaderVtable;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct spAttachmentLoader spAttachmentLoader;
-struct spAttachmentLoader {
-	const char* error1;
-	const char* error2;
-
-	const void* const vtable;
-#ifdef __cplusplus
-	spAttachmentLoader () :
-					error1(0),
-					error2(0),
-					vtable(0) {
-	}
-#endif
-};
-
-void spAttachmentLoader_dispose (spAttachmentLoader* self);
-
-/* Returns 0 to not load an attachment. If 0 is returned and spAttachmentLoader.error1 is set, an error occurred. */
-spAttachment* spAttachmentLoader_newAttachment (spAttachmentLoader* self, spSkin* skin, spAttachmentType type, const char* name,
-		const char* path);
-
-#ifdef SPINE_SHORT_NAMES
-typedef spAttachmentLoader AttachmentLoader;
-#define AttachmentLoader_dispose(...) spAttachmentLoader_dispose(__VA_ARGS__)
-#define AttachmentLoader_newAttachment(...) spAttachmentLoader_newAttachment(__VA_ARGS__)
-#endif
-
-#ifdef __cplusplus
+void _spAttachmentLoader_init (spAttachmentLoader* self, /**/
+void (*dispose) (spAttachmentLoader* self), /**/
+		spAttachment* (*newAttachment) (spAttachmentLoader* self, spSkin* skin, spAttachmentType type, const char* name,
+				const char* path)) {
+	CONST_CAST(_spAttachmentLoaderVtable*, self->vtable) = NEW(_spAttachmentLoaderVtable);
+	VTABLE(spAttachmentLoader, self)->dispose = dispose;
+	VTABLE(spAttachmentLoader, self)->newAttachment = newAttachment;
 }
-#endif
 
-#endif /* SPINE_ATTACHMENTLOADER_H_ */
+void _spAttachmentLoader_deinit (spAttachmentLoader* self) {
+	FREE(self->vtable);
+	FREE(self->error1);
+	FREE(self->error2);
+}
+
+void spAttachmentLoader_dispose (spAttachmentLoader* self) {
+	VTABLE(spAttachmentLoader, self)->dispose(self);
+	FREE(self);
+}
+
+spAttachment* spAttachmentLoader_newAttachment (spAttachmentLoader* self, spSkin* skin, spAttachmentType type, const char* name,
+		const char* path) {
+	FREE(self->error1);
+	FREE(self->error2);
+	self->error1 = 0;
+	self->error2 = 0;
+	return VTABLE(spAttachmentLoader, self)->newAttachment(self, skin, type, name, path);
+}
+
+void _spAttachmentLoader_setError (spAttachmentLoader* self, const char* error1, const char* error2) {
+	FREE(self->error1);
+	FREE(self->error2);
+	MALLOC_STR(self->error1, error1);
+	MALLOC_STR(self->error2, error2);
+}
+
+void _spAttachmentLoader_setUnknownTypeError (spAttachmentLoader* self, spAttachmentType type) {
+	char buffer[16];
+	sprintf(buffer, "%d", type);
+	_spAttachmentLoader_setError(self, "Unknown attachment type: ", buffer);
+}

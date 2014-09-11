@@ -28,47 +28,51 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef SPINE_SKIN_H_
-#define SPINE_SKIN_H_
+#include <spine/extension.h>
+#include <stdio.h>
 
-#include <spine/Attachment.h>
+static void* (*mallocFunc) (size_t size) = malloc;
+static void* (*debugMallocFunc) (size_t size, const char* file, int line) = NULL;
+static void (*freeFunc) (void* ptr) = free;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void* _malloc (size_t size, const char* file, int line) {
+	if(debugMallocFunc)
+		return debugMallocFunc(size, file, line);
 
-struct spSkeleton;
-
-typedef struct {
-	const char* const name;
-} spSkin;
-
-spSkin* spSkin_create (const char* name);
-void spSkin_dispose (spSkin* self);
-
-/* The Skin owns the attachment. */
-void spSkin_addAttachment (spSkin* self, int slotIndex, const char* name, spAttachment* attachment);
-/* Returns 0 if the attachment was not found. */
-spAttachment* spSkin_getAttachment (const spSkin* self, int slotIndex, const char* name);
-
-/* Returns 0 if the slot or attachment was not found. */
-const char* spSkin_getAttachmentName (const spSkin* self, int slotIndex, int attachmentIndex);
-
-/** Attach each attachment in this skin if the corresponding attachment in oldSkin is currently attached. */
-void spSkin_attachAll (const spSkin* self, struct spSkeleton* skeleton, const spSkin* oldspSkin);
-
-#ifdef SPINE_SHORT_NAMES
-typedef spSkin Skin;
-#define Skin_create(...) spSkin_create(__VA_ARGS__)
-#define Skin_dispose(...) spSkin_dispose(__VA_ARGS__)
-#define Skin_addAttachment(...) spSkin_addAttachment(__VA_ARGS__)
-#define Skin_getAttachment(...) spSkin_getAttachment(__VA_ARGS__)
-#define Skin_getAttachmentName(...) spSkin_getAttachmentName(__VA_ARGS__)
-#define Skin_attachAll(...) spSkin_attachAll(__VA_ARGS__)
-#endif
-
-#ifdef __cplusplus
+	return mallocFunc(size);
 }
-#endif
+void* _calloc (size_t num, size_t size, const char* file, int line) {
+	void* ptr = _malloc(num * size, file, line);
+	if (ptr) memset(ptr, 0, num * size);
+	return ptr;
+}
+void _free (void* ptr) {
+	freeFunc(ptr);
+}
 
-#endif /* SPINE_SKIN_H_ */
+void _setDebugMalloc(void* (*malloc) (size_t size, const char* file, int line)) {
+	debugMallocFunc = malloc;
+}
+
+void _setMalloc (void* (*malloc) (size_t size)) {
+	mallocFunc = malloc;
+}
+void _setFree (void (*free) (void* ptr)) {
+	freeFunc = free;
+}
+
+char* _readFile (const char* path, int* length) {
+	char *data;
+	FILE *file = fopen(path, "rb");
+	if (!file) return 0;
+
+	fseek(file, 0, SEEK_END);
+	*length = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	data = MALLOC(char, *length);
+	fread(data, 1, *length, file);
+	fclose(file);
+
+	return data;
+}
