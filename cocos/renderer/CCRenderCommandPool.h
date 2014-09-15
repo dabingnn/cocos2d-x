@@ -36,25 +36,8 @@ template <class T>
 class RenderCommandPool
 {
 public:
-    RenderCommandPool()
-    {
-    }
-    ~RenderCommandPool()
-    {
-//        if( 0 != _usedPool.size())
-//        {
-//            CCLOG("All RenderCommand should not be used when Pool is released!");
-//        }
-        _freePool.clear();
-        for (typename std::list<T*>::iterator iter = _allocatedPoolBlocks.begin(); iter != _allocatedPoolBlocks.end(); ++iter)
-        {
-            delete[] *iter;
-            *iter = nullptr;
-        }
-        _allocatedPoolBlocks.clear();
-    }
 
-    T* generateCommand()
+    static T* fetchCommand()
     {
         T* result = nullptr;
         if(_freePool.empty())
@@ -63,38 +46,34 @@ public:
         }
         result = _freePool.front();
         _freePool.pop_front();
-        //_usedPool.insert(result);
         return result;
     }
     
-    void pushBackCommand(T* ptr)
+    static void pushBackCommand(T* ptr)
     {
-//        if(_usedPool.find(ptr) == _usedPool.end())
-//        {
-//            CCLOG("push Back Wrong command!");
-//            return;
-//        }
-        
-        _freePool.push_back(ptr);
-        //_usedPool.erase(ptr);
+        _freePool.push_front(ptr);
         
     }
 private:
-    void AllocateCommands()
+    static void AllocateCommands()
     {
-        static const int COMMANDS_ALLOCATE_BLOCK_SIZE = 32;
-        T* commands = new (std::nothrow) T[COMMANDS_ALLOCATE_BLOCK_SIZE];
-        _allocatedPoolBlocks.push_back(commands);
+        static const int COMMANDS_ALLOCATE_BLOCK_SIZE = 128;
+        _allocatedPoolBlocks.push_back(std::vector<T>());
+        _allocatedPoolBlocks.back().resize(COMMANDS_ALLOCATE_BLOCK_SIZE);
+        auto& commands = _allocatedPoolBlocks.back();
         for(int index = 0; index < COMMANDS_ALLOCATE_BLOCK_SIZE; ++index)
         {
-            _freePool.push_back(commands+index);
+            _freePool.push_back(&commands[index]);
         }
     }
 
-    std::list<T*> _allocatedPoolBlocks;
-    std::list<T*> _freePool;
-    //std::set<T*> _usedPool;
+    static std::list<std::vector<T>> _allocatedPoolBlocks;
+    static std::list<T*> _freePool;
 };
+template <class T>
+std::list<std::vector<T>> RenderCommandPool<T>::_allocatedPoolBlocks;
+template <class T>
+std::list<T*> RenderCommandPool<T>::_freePool;
 
 NS_CC_END
 
