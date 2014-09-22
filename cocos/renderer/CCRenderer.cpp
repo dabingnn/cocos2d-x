@@ -363,6 +363,8 @@ void Renderer::visitRenderQueue(const RenderQueue& queue)
         {
             CCLOGERROR("Unknown commands in renderQueue");
         }
+        
+        command->releaseToPool();
     }
 }
 

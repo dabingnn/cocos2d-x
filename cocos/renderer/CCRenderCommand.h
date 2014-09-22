@@ -64,7 +64,13 @@ public:
     
     /** set transparent flag */
     inline void setTransparent(bool isTransparent) { _isTransparent = isTransparent; }
-
+    
+    //do noThing
+    virtual void releaseToPool() { }
+    
+    void setInPool() { _isInPool = true; }
+    bool isInPool() const { return _isInPool; }
+    
 protected:
     RenderCommand();
     virtual ~RenderCommand();
@@ -79,6 +85,9 @@ protected:
     
     // transparent flag
     bool  _isTransparent;
+    
+    //indicate the command is allocated by pool or not
+    bool _isInPool;
 };
 
 NS_CC_END

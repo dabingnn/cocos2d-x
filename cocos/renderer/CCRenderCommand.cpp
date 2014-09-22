@@ -31,6 +31,7 @@ RenderCommand::RenderCommand()
 : _type(RenderCommand::Type::UNKNOWN_COMMAND)
 , _globalOrder(0)
 , _isTransparent(false)
+, _isInPool(false)
 {
 }
 

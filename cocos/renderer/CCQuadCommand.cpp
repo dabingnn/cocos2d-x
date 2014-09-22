@@ -29,6 +29,7 @@
 #include "renderer/CCGLProgram.h"
 #include "xxhash.h"
 #include "renderer/CCRenderer.h"
+#include "renderer/CCRenderCommandPool.h"
 
 NS_CC_BEGIN
 
@@ -81,6 +82,14 @@ void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* glPr
         _glProgramState = glProgramState;
 
         generateMaterialID();
+    }
+}
+
+void QuadCommand::releaseToPool()
+{
+    if(isInPool())
+    {
+        RenderCommandPool<QuadCommand>::pushBackCommand(this);
     }
 }
 

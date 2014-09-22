@@ -46,7 +46,8 @@ public:
 
     inline const V3F_C4B_T2F_Quad* getQuads() const { return _quads; }
     inline ssize_t getQuadCount() const { return _quadsCount; }
-
+    
+    virtual void releaseToPool() override;
 protected:
     V3F_C4B_T2F_Quad* _quads;
     ssize_t _quadsCount;
