@@ -35,7 +35,11 @@ namespace experimental{
     namespace ui{
         
         WebView::WebView()
-        : _impl(new WebViewImpl(this))
+        : _impl(new WebViewImpl(this)),
+        _onJSCallback(nullptr),
+        _onShouldStartLoading(nullptr),
+        _onDidFinishLoading(nullptr),
+        _onDidFailLoading(nullptr)
         {
         }
         
@@ -74,9 +78,9 @@ namespace experimental{
             _impl->loadHTMLString(string, baseURL);
         }
         
-        void WebView::loadUrl(const std::string &url)
+        void WebView::loadURL(const std::string &url)
         {
-            _impl->loadUrl(url);
+            _impl->loadURL(url);
         }
         
         void WebView::loadFile(const std::string &fileName)
@@ -135,6 +139,65 @@ namespace experimental{
             Node::setVisible(visible);
             _impl->setVisible(visible);
         }
+        
+        cocos2d::ui::Widget* WebView::createCloneInstance()
+        {
+            return WebView::create();
+        }
+
+        void WebView::copySpecialProperties(Widget* model)
+        {
+            WebView* webView = dynamic_cast<WebView*>(model);
+            if (webView)
+            {
+                this->_impl = webView->_impl;
+                this->_onShouldStartLoading = webView->_onShouldStartLoading;
+                this->_onDidFinishLoading = webView->_onDidFinishLoading;
+                this->_onDidFailLoading = webView->_onDidFailLoading;
+                this->_onJSCallback = webView->_onJSCallback;
+            }
+        }
+        
+        void WebView::setOnDidFailLoading(const ccWebViewCallback &callback)
+        {
+            _onDidFailLoading = callback;
+        }
+        
+        void WebView::setOnDidFinishLoading(const ccWebViewCallback &callback)
+        {
+            _onDidFinishLoading = callback;
+        }
+        
+        void WebView::setOnShouldStartLoading(const std::function<bool(WebView *sender, const std::string &url)> &callback)
+        {
+            _onShouldStartLoading = callback;
+        }
+        
+        void WebView::setOnJSCallback(const ccWebViewCallback &callback)
+        {
+            _onJSCallback = callback;
+        }
+        
+        std::function<bool(WebView *sender, const std::string &url)> WebView::getOnShouldStartLoading()const
+        {
+            return _onShouldStartLoading;
+        }
+        
+        WebView::ccWebViewCallback WebView::getOnDidFailLoading()const
+        {
+            return _onDidFailLoading;
+        }
+        
+        WebView::ccWebViewCallback WebView::getOnDidFinishLoading()const
+        {
+            return _onDidFinishLoading;
+        }
+        
+        WebView::ccWebViewCallback WebView::getOnJSCallback()const
+        {
+            return _onJSCallback;
+        }
+        
     } // namespace ui
 } // namespace experimental
 } //namespace cocos2d

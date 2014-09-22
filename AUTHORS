@@ -1000,6 +1000,15 @@ Developers:
         
     denpen
         Fixed a bug that scroll view hidden picks up the touch events.
+        
+    joewan
+        Fixed memory leak when use menu_selector
+        
+    zhongfq
+        Optimize decompress jpg data
+        
+    wohaaitinciu
+        WebView support on windows
     
 Retired Core Developers:
     WenSheng Yang
