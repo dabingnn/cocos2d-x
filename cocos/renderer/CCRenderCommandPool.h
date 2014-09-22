@@ -46,6 +46,7 @@ public:
         }
         result = _freePool.front();
         _freePool.pop_front();
+        result->setInPool();
         return result;
     }
     
