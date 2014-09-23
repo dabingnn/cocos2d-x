@@ -586,8 +586,10 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 
     if(_insideBounds)
     {
-        _quadCommand.init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, &_quad, 1, transform);
-        renderer->addCommand(&_quadCommand);
+        auto command = RenderCommandPool<QuadCommand>::fetchCommand();
+        //auto command = &_quadCommand;
+        command->init(_globalZOrder, _texture->getName(), getGLProgramState(), _blendFunc, &_quad, 1, transform);
+        renderer->addCommand(command);
 #if CC_SPRITE_DEBUG_DRAW
         _debugDrawNode->clear();
         Vec2 vertices[4] = {
