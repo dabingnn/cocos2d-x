@@ -19,7 +19,7 @@
  */
 
 NS_CC_MATH_BEGIN
-
+//##
 inline void MathUtil::addMatrix(const float* m, float scalar, float* dst)
 {
     asm volatile(
