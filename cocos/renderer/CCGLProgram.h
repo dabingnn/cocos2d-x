@@ -47,9 +47,14 @@ NS_CC_BEGIN
 
 class GLProgram;
 class Director;
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+typedef void (GLAPIENTRY *GLInfoFunction)(GLuint program, GLenum pname, GLint* params);
+typedef void (GLAPIENTRY *GLLogFunction) (GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog);
+#else
 typedef void (*GLInfoFunction)(GLuint program, GLenum pname, GLint* params);
 typedef void (*GLLogFunction) (GLuint program, GLsizei bufsize, GLsizei* length, GLchar* infolog);
-
+#endif
 
 struct VertexAttrib
 {
