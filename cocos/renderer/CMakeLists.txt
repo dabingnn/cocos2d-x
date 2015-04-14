@@ -2,6 +2,7 @@
 set(COCOS_RENDERER_SRC
 
   renderer/CCBatchCommand.cpp
+  renderer/CCCommandBuffer.cpp
   renderer/CCCustomCommand.cpp
   renderer/CCGLProgram.cpp
   renderer/CCGLProgramCache.cpp

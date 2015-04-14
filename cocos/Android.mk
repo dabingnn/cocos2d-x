@@ -154,6 +154,7 @@ base/allocator/CCAllocatorGlobal.cpp \
 base/allocator/CCAllocatorGlobalNewDelete.cpp \
 base/ObjectFactory.cpp \
 renderer/CCBatchCommand.cpp \
+renderer/CCCommandBuffer.cpp \
 renderer/CCCustomCommand.cpp \
 renderer/CCGLProgram.cpp \
 renderer/CCGLProgramCache.cpp \

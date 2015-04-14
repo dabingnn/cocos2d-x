@@ -835,23 +835,25 @@ void Renderer::drawBatchedQuads()
         auto newMaterialID = cmd->getMaterialID();
         if(_lastMaterialID != newMaterialID || newMaterialID == MATERIAL_ID_DO_NOT_BATCH)
         {
-            //Draw quads
-            if(indexToDraw > 0)
-            {
-                glDrawElements(GL_TRIANGLES, (GLsizei) indexToDraw, GL_UNSIGNED_SHORT, (GLvoid*) (startIndex*sizeof(_indices[0])) );
-                _drawnBatches++;
-                _drawnVertices += indexToDraw;
-                
-                startIndex += indexToDraw;
-                indexToDraw = 0;
-            }
+
             
             //Use new material
             cmd->useMaterial();
             _lastMaterialID = newMaterialID;
         }
         
-        indexToDraw += cmd->getQuadCount() * 6;
+        //Draw quads
+        //if(indexToDraw > 0)
+        {
+            glDrawElements(GL_TRIANGLES, (GLsizei) 6, GL_UNSIGNED_SHORT, (GLvoid*) (startIndex*sizeof(_indices[0])) );
+            _drawnBatches++;
+            _drawnVertices += indexToDraw;
+            
+            startIndex += 6;
+            indexToDraw = 0;
+        }
+        
+        //indexToDraw += cmd->getQuadCount() * 6;
     }
     
     //Draw any remaining quad

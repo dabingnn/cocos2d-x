@@ -1123,7 +1123,11 @@ void Director::showStats()
     static const float FPS_FILTER = 0.10f;
 
     _accumDt += _deltaTime;
-    
+    static struct timeval old;
+    struct timeval now;
+    gettimeofday(&now, nullptr);
+    CCLOG("%.3f | %u\n", ((float)now.tv_usec)/1000, (now.tv_sec * 1000 + now.tv_usec / 1000 - (old.tv_sec * 1000 + old.tv_usec / 1000)));
+    old = now;
     if (_displayStats && _FPSLabel && _drawnBatchesLabel && _drawnVerticesLabel)
     {
         char buffer[30];
