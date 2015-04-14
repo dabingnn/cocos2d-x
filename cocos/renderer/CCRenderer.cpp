@@ -845,11 +845,11 @@ void Renderer::drawBatchedQuads()
         //Draw quads
         //if(indexToDraw > 0)
         {
-            glDrawElements(GL_TRIANGLES, (GLsizei) 6, GL_UNSIGNED_SHORT, (GLvoid*) (startIndex*sizeof(_indices[0])) );
+            glDrawElements(GL_TRIANGLES, (GLsizei) cmd->getQuadCount() * 6, GL_UNSIGNED_SHORT, (GLvoid*) (startIndex*sizeof(_indices[0])) );
             _drawnBatches++;
-            _drawnVertices += indexToDraw;
+            _drawnVertices += cmd->getQuadCount() * 6;
             
-            startIndex += 6;
+            startIndex += cmd->getQuadCount() * 6;
             indexToDraw = 0;
         }
         
