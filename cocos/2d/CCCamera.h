@@ -32,7 +32,7 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 class Scene;
-
+class FrameBufferObject;
 /**
  * Note: 
  * Scene creates a default camera. And the default camera mask of Node is 1, therefore it can be seen by the default camera.
@@ -196,12 +196,17 @@ public:
     /**
      * set depth, camera with larger depth is drawn on top of camera with smaller depth, the depth of camera with CameraFlag::DEFAULT is 0, user defined camera is -1 by default
      */
-    void setDepth(int depth);
+    void setDepth(int8_t depth);
     
     /**
      * get depth, camera with larger depth is drawn on top of camera with smaller depth, the depth of camera with CameraFlag::DEFAULT is 0, user defined camera is -1 by default
      */
-    int getDepth() const { return _depth; }
+    int8_t getDepth() const { return _depth; }
+    
+    /**
+     get rendered order
+     */
+    int getRenderOrder() const;
     
     /**
      * Get the frustum's far plane.
@@ -226,8 +231,18 @@ public:
      * Get the default camera of the current running scene.
      */
     static Camera* getDefaultCamera();
-    
+    /**
+     Before rendering scene with this camera, the background need to be cleared.
+     */
     void clearBackground(float depth);
+    /**
+     Apply the FBO, RenderTargets and viewport.
+     */
+    void apply();
+    /**
+     Set FBO, which will attacha several render target for the rendered result.
+    */
+    void setFrameBufferObject(FrameBufferObject* fbo);
     
 CC_CONSTRUCTOR_ACCESS:
     Camera();
@@ -245,7 +260,7 @@ CC_CONSTRUCTOR_ACCESS:
     bool initDefault();
     bool initPerspective(float fieldOfView, float aspectRatio, float nearPlane, float farPlane);
     bool initOrthographic(float zoomX, float zoomY, float nearPlane, float farPlane);
-    
+    void applyFrameBufferObject();
 protected:
 
     Scene* _scene; //Scene camera belongs to
@@ -264,10 +279,12 @@ protected:
     unsigned short _cameraFlag; // camera flag
     mutable Frustum _frustum;   // camera frustum
     mutable bool _frustumDirty;
-    int  _depth;                 //camera depth, the depth of camera with CameraFlag::DEFAULT flag is 0 by default, a camera with larger depth is drawn on top of camera with smaller detph
+    int8_t  _depth;                 //camera depth, the depth of camera with CameraFlag::DEFAULT flag is 0 by default, a camera with larger depth is drawn on top of camera with smaller detph
     static Camera* _visitingCamera;
     
     friend class Director;
+    
+    FrameBufferObject* _fbo;
 };
 
 NS_CC_END
