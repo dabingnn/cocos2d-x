@@ -4,6 +4,7 @@ USING_NS_CC;
 
 TerrainTests::TerrainTests()
 {
+    ADD_TEST_CASE(TerrainVR);
     ADD_TEST_CASE(TerrainSimple);
     ADD_TEST_CASE(TerrainWalkThru);
 }
@@ -74,6 +75,46 @@ void TerrainSimple::onTouchesMoved(const std::vector<cocos2d::Touch*>& touches, 
     _camera->setPosition3D(cameraPos);   
 }
 
+
+TerrainVR::TerrainVR()
+{
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    
+    //use custom camera
+    _camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.1f,800);
+    _camera->setCameraFlag(CameraFlag::USER1);
+    _camera->setPosition3D(Vec3(-1,1.6f,4));
+    _camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+    addChild(_camera);
+    
+    Terrain::DetailMap r("TerrainTest/dirt.jpg"),g("TerrainTest/Grass2.jpg"),b("TerrainTest/road.jpg"),a("TerrainTest/GreenSkin.jpg");
+    
+    Terrain::TerrainData data("TerrainTest/heightmap16.jpg","TerrainTest/alphamap.png",r,g,b,a);
+    
+    _terrain = Terrain::create(data,Terrain::CrackFixedType::SKIRT);
+    _terrain->setLODDistance(3.2f,6.4f,9.6f);
+    _terrain->setMaxDetailMapAmount(4);
+    addChild(_terrain);
+    _terrain->setCameraMask(2);
+    _terrain->setDrawWire(false);
+    
+    // add Particle3D for test blend
+    auto rootps = PUParticleSystem3D::create("Particle3D/scripts/mp_torch.pu");
+    rootps->setCameraMask((unsigned short)CameraFlag::USER1);
+    rootps->startParticleSystem();
+    
+    this->addChild(rootps, 0, 0);
+}
+
+std::string TerrainVR::title() const
+{
+    return "Terrain with VR support";
+}
+
+std::string TerrainVR::subtitle() const
+{
+    return "";
+}
 
 std::string TerrainWalkThru::title() const 
 {

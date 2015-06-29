@@ -28,6 +28,18 @@ protected:
     cocos2d::Camera* _camera;
 };
 
+class TerrainVR : public TerrainTestDemo
+{
+public:
+    CREATE_FUNC(TerrainVR);
+    TerrainVR();
+    virtual std::string title() const override;
+    virtual std::string subtitle() const override;
+    cocos2d::Terrain* _terrain;
+protected:
+    cocos2d::Camera* _camera;
+};
+
 #define PLAYER_STATE_LEFT 0 
 #define PLAYER_STATE_RIGHT 1
 #define PLAYER_STATE_IDLE 2
