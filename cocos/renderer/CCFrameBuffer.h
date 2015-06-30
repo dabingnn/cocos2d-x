@@ -33,6 +33,7 @@
 NS_CC_BEGIN
 
 class GLView;
+class Scene;
 class EventListenerCustom;
 class Camera;
 
@@ -174,9 +175,11 @@ public:
     unsigned int getWidth() const { return _width; }
     unsigned int getHeight() const { return _height; }
     
-    const std::set<Camera*>& getRenderCameras() const { return _renderCameras; }
-    void addRenderCamera(Camera* camera) { _renderCameras.insert(camera);}
-    void removeRenderCamera(Camera* camera) { _renderCameras.erase(camera);}
+    const std::vector<Camera*>& getRenderCameras() const { return _renderCameras; }
+    void addRenderCamera(Camera* camera);
+    void removeRenderCamera(Camera* camera);
+    
+    void refreshWithScene(Scene* scene);
     
 CC_CONSTRUCTOR_ACCESS:
     FrameBuffer();
@@ -199,7 +202,7 @@ private:
     RenderTargetDepthStencil* _rtDepthStencil;
     bool _isDefault;
     //weak reference
-    std::set<Camera*> _renderCameras;
+    std::vector<Camera*> _renderCameras;
 public:
     static FrameBuffer* create(GLView* glView);
     static void applyDefaultFBO();

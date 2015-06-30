@@ -48,6 +48,11 @@ class Physics3DWorld;
 class NavMesh;
 #endif
 
+namespace experimental
+{
+    class FrameBuffer;
+}
+
 /**
  * @addtogroup _2d
  * @{
@@ -111,6 +116,7 @@ public:
      */
     void render(Renderer* renderer);
     
+    void renderWithFrameBuffer(experimental::FrameBuffer* fbo);
     /** override function */
     virtual void removeAllChildren() override;
     

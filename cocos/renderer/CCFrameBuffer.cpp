@@ -435,6 +435,34 @@ void FrameBuffer::attachRenderTarget(RenderTargetBase* rt)
     _fboBindingDirty = true;
 }
 
+void FrameBuffer::addRenderCamera(Camera* camera)
+{
+    auto iter = std::find(_renderCameras.begin(), _renderCameras.end(), camera);
+    if(iter == _renderCameras.end())
+    {
+        _renderCameras.push_back(camera);
+    }
+    else
+    {
+        CCLOG("Camera has been added to FrameBuffer");
+    }
+}
+
+void FrameBuffer::removeRenderCamera(Camera* camera)
+{
+    auto iter = std::find(_renderCameras.begin(), _renderCameras.end(), camera);
+    if(iter != _renderCameras.end())
+        _renderCameras.erase(iter);
+    else
+        CCLOG("Camera does not exist in FrameBuffer");
+}
+
+void FrameBuffer::refreshWithScene(Scene *scene)
+{
+    if(scene)
+        scene->renderWithFrameBuffer(this);
+}
+    
 void FrameBuffer::applyFBO()
 {
     CHECK_GL_ERROR_DEBUG();

@@ -219,6 +219,63 @@ void Scene::render(Renderer* renderer)
     experimental::FrameBuffer::applyDefaultFBO();
 }
 
+void Scene::renderWithFrameBuffer(experimental::FrameBuffer *fbo)
+{
+    if(nullptr == fbo) return;
+    
+    auto director = Director::getInstance();
+    auto renderer = director->getRenderer();
+    
+    Camera* defaultCamera = nullptr;
+    const auto& transform = getNodeToParentTransform();
+    std::vector<Camera*> cameras = fbo->getRenderCameras();
+    stable_sort(cameras.begin(), cameras.end(), camera_cmp);
+    
+    for (const auto& camera : cameras)
+    {
+        if (!camera->isVisible())
+            continue;
+        
+        Camera::_visitingCamera = camera;
+        if (Camera::_visitingCamera->getCameraFlag() == CameraFlag::DEFAULT)
+        {
+            defaultCamera = Camera::_visitingCamera;
+        }
+        
+        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, Camera::_visitingCamera->getViewProjectionMatrix());
+        camera->apply();
+        //clear background with max depth
+        camera->clearBackground(1.0);
+        //visit the scene
+        visit(renderer, transform, 0);
+#if CC_USE_NAVMESH
+        if (_navMesh && _navMeshDebugCamera == camera)
+        {
+            _navMesh->debugDraw(renderer);
+        }
+#endif
+        
+        renderer->render();
+        
+        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    }
+    
+#if CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION
+    if (_physics3DWorld && _physics3DWorld->isDebugDrawEnabled())
+    {
+        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, _physics3dDebugCamera != nullptr ? _physics3dDebugCamera->getViewProjectionMatrix() : defaultCamera->getViewProjectionMatrix());
+        _physics3DWorld->debugDraw(renderer);
+        renderer->render();
+        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    }
+#endif
+    
+    Camera::_visitingCamera = nullptr;
+    experimental::FrameBuffer::applyDefaultFBO();
+}
+
 void Scene::removeAllChildren()
 {
     if (_defaultCamera)
