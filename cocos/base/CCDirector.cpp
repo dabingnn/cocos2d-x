@@ -398,7 +398,7 @@ void Director::setOpenGLView(GLView *openGLView)
             _eventDispatcher->setEnabled(true);
         }
         
-        _defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
+        _defaultFBO = experimental::FrameBuffer::create(_openGLView);
         _defaultFBO->retain();
     }
 }
@@ -691,9 +691,8 @@ void Director::setDepthTest(bool on)
 void Director::setClearColor(const Color4F& clearColor)
 {
     _renderer->setClearColor(clearColor);
-    auto defaultFBO = experimental::FrameBuffer::getOrCreateDefaultFBO(_openGLView);
-    
-    if(defaultFBO) defaultFBO->setClearColor(clearColor);
+    CCASSERT(_defaultFBO, "Can not set clear color when default fbo is not available");
+    if(_defaultFBO) _defaultFBO->setClearColor(clearColor);
 }
 
 static void GLToClipTransform(Mat4 *transformOut)

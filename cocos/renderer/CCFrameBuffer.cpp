@@ -31,7 +31,6 @@
 
 NS_CC_BEGIN
 namespace experimental{
-FrameBuffer* FrameBuffer::_defaultFBO = nullptr;
 std::set<FrameBuffer*> FrameBuffer::_frameBuffers;
 
 Viewport::Viewport(float left, float bottom, float width, float height)
@@ -292,33 +291,30 @@ bool FrameBuffer::initWithGLView(GLView* view)
     return true;
 }
 
-FrameBuffer* FrameBuffer::getOrCreateDefaultFBO(GLView* view)
+FrameBuffer* FrameBuffer::create(GLView* view)
 {
-    if(nullptr == _defaultFBO)
+    auto result = new (std::nothrow) FrameBuffer();
+    
+    if(result && result->initWithGLView(view))
     {
-        auto result = new (std::nothrow) FrameBuffer();
-        
-        if(result && result->initWithGLView(view))
-        {
-            result->autorelease();
-            result->_isDefault = true;
-        }
-        else
-        {
-            CC_SAFE_DELETE(result);
-        }
-        
-        _defaultFBO = result;
+        result->autorelease();
+        result->_isDefault = true;
+    }
+    else
+    {
+        CC_SAFE_DELETE(result);
     }
     
-    return _defaultFBO;
+    return result;
 }
 
 void FrameBuffer::applyDefaultFBO()
 {
-    if(_defaultFBO)
+    auto fbo = Director::getInstance()->getDefaultFBO();
+    CCASSERT(fbo, "Default FBO should not be null");
+    if(fbo)
     {
-        _defaultFBO->applyFBO();
+        fbo->applyFBO();
     }
 }
 

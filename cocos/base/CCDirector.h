@@ -487,7 +487,9 @@ public:
      * @js NA
      */
     void resetMatrixStack();
-
+    
+    experimental::FrameBuffer* getDefaultFBO() const { return _defaultFBO; }
+    
 protected:
     void reset();
     

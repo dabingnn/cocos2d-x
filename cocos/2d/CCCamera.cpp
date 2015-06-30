@@ -100,6 +100,10 @@ Camera::Camera()
 
 Camera::~Camera()
 {
+    if(_fbo)
+    {
+        _fbo->removeRenderCamera(this);
+    }
     CC_SAFE_RELEASE_NULL(_fbo);
 }
 
@@ -483,9 +487,17 @@ void Camera::clearBackground(float depth)
 
 void Camera::setFrameBufferObject(experimental::FrameBuffer *fbo)
 {
+    if(_fbo)
+    {
+        _fbo->removeRenderCamera(this);
+    }
     CC_SAFE_RETAIN(fbo);
     CC_SAFE_RELEASE_NULL(_fbo);
     _fbo = fbo;
+    if(_fbo)
+    {
+        _fbo->addRenderCamera(this);
+    }
     if(_scene)
     {
         _scene->setCameraOrderDirty();

@@ -34,6 +34,7 @@ NS_CC_BEGIN
 
 class GLView;
 class EventListenerCustom;
+class Camera;
 
 namespace experimental {
 
@@ -172,7 +173,11 @@ public:
     bool isDefaultFBO() const { return _isDefault; }
     unsigned int getWidth() const { return _width; }
     unsigned int getHeight() const { return _height; }
-
+    
+    const std::set<Camera*>& getRenderCameras() const { return _renderCameras; }
+    void addRenderCamera(Camera* camera) { _renderCameras.insert(camera);}
+    void removeRenderCamera(Camera* camera) { _renderCameras.erase(camera);}
+    
 CC_CONSTRUCTOR_ACCESS:
     FrameBuffer();
     virtual ~FrameBuffer();
@@ -193,13 +198,13 @@ private:
     RenderTargetBase* _rt;
     RenderTargetDepthStencil* _rtDepthStencil;
     bool _isDefault;
+    //weak reference
+    std::set<Camera*> _renderCameras;
 public:
-    static FrameBuffer* getOrCreateDefaultFBO(GLView* glView);
+    static FrameBuffer* create(GLView* glView);
     static void applyDefaultFBO();
     static void clearAllFBOs();
 private:
-    //static GLuint _defaultFBO;
-    static FrameBuffer* _defaultFBO;
     static std::set<FrameBuffer*> _frameBuffers;
     
 private:
