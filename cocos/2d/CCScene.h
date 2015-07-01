@@ -102,7 +102,7 @@ public:
      * @js NA
      * @return The default camera of scene.
      */
-    Camera* getDefaultCamera() const { return _defaultCamera; }
+    const Camera* getDefaultCamera() const;
 
     /** Get lights.
      * @return The vector of lights.
@@ -140,7 +140,7 @@ protected:
     friend class Renderer;
     
     std::vector<Camera*> _cameras; //weak ref to Camera
-    Camera*              _defaultCamera; //weak ref, default camera created by scene, _cameras[0], Caution that the default camera can not be added to _cameras before onEnter is called
+    //Camera*              _defaultCamera; //weak ref, default camera created by scene, _cameras[0], Caution that the default camera can not be added to _cameras before onEnter is called
     bool                 _cameraOrderDirty; // order is dirty, need sort
     EventListenerCustom*       _event;
 

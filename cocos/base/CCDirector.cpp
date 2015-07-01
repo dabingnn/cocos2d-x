@@ -165,6 +165,9 @@ bool Director::init(void)
     //init TextureCache
     initTextureCache();
     initMatrixStack();
+    
+    _defaultCamera = Camera::create();
+    _defaultCamera->retain();
 
     _renderer = new (std::nothrow) Renderer;
     RenderState::initialize();
@@ -185,6 +188,7 @@ Director::~Director(void)
     CC_SAFE_RELEASE(_scheduler);
     CC_SAFE_RELEASE(_actionManager);
     CC_SAFE_DELETE(_defaultFBO);
+    CC_SAFE_RELEASE(_defaultCamera);
     
     delete _eventAfterUpdate;
     delete _eventAfterDraw;
@@ -645,6 +649,8 @@ void Director::setProjection(Projection projection)
     GL::setProjectionMatrixDirty();
 
     _eventDispatcher->dispatchEvent(_eventProjectionChanged);
+    //recreate default camera
+    _defaultCamera->initDefault();
 }
 
 void Director::purgeCachedData(void)
@@ -788,6 +794,10 @@ Vec2 Director::getVisibleOrigin() const
     }
 }
 
+Camera* Director::getDefaultCamera() const
+{
+    return _defaultCamera;
+}
 // scene management
 
 void Director::runWithScene(Scene *scene)

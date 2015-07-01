@@ -68,8 +68,6 @@ Scene::Scene()
     _cameraOrderDirty = true;
     
     //create default camera
-    _defaultCamera = Camera::create();
-    addChild(_defaultCamera);
     
     _event = Director::getInstance()->getEventDispatcher()->addCustomEventListener(Director::EVENT_PROJECTION_CHANGED, std::bind(&Scene::onProjectionChanged, this, std::placeholders::_1));
     _event->retain();
@@ -152,10 +150,6 @@ std::string Scene::getDescription() const
 
 void Scene::onProjectionChanged(EventCustom* event)
 {
-    if (_defaultCamera)
-    {
-        _defaultCamera->initDefault();
-    }
 }
 
 static bool camera_cmp(const Camera* a, const Camera* b)
@@ -163,18 +157,26 @@ static bool camera_cmp(const Camera* a, const Camera* b)
     return a->getRenderOrder() < b->getRenderOrder();
 }
 
+const Camera* Scene::getDefaultCamera() const
+{
+    return Director::getInstance()->getDefaultCamera();
+}
+
 void Scene::render(Renderer* renderer)
 {
     auto director = Director::getInstance();
     Camera* defaultCamera = nullptr;
     const auto& transform = getNodeToParentTransform();
-    if (_cameraOrderDirty)
+    std::vector<Camera*> cameras = _cameras;
+    cameras.push_back(Director::getInstance()->getDefaultCamera());
+    
+    //if (_cameraOrderDirty)
     {
-        stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
+        stable_sort(cameras.begin(), cameras.end(), camera_cmp);
         _cameraOrderDirty = false;
     }
     
-    for (const auto& camera : _cameras)
+    for (const auto& camera : cameras)
     {
         if (!camera->isVisible())
             continue;
@@ -278,16 +280,7 @@ void Scene::renderWithFrameBuffer(experimental::FrameBuffer *fbo)
 
 void Scene::removeAllChildren()
 {
-    if (_defaultCamera)
-        _defaultCamera->retain();
-    
     Node::removeAllChildren();
-    
-    if (_defaultCamera)
-    {
-        addChild(_defaultCamera);
-        _defaultCamera->release();
-    }
 }
 
 #if CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION

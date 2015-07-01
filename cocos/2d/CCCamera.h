@@ -234,7 +234,7 @@ public:
     /**
      * Get the default camera of the current running scene.
      */
-    static Camera* getDefaultCamera();
+    static const Camera* getDefaultCamera();
     /**
      Before rendering scene with this camera, the background need to be cleared.
      */

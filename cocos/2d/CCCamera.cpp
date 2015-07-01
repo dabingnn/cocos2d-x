@@ -40,15 +40,9 @@ NS_CC_BEGIN
 Camera* Camera::_visitingCamera = nullptr;
 experimental::Viewport Camera::_defaultViewport;
 
-Camera* Camera::getDefaultCamera()
+const Camera* Camera::getDefaultCamera()
 {
-    auto scene = Director::getInstance()->getRunningScene();
-    if(scene)
-    {
-        return scene->getDefaultCamera();
-    }
-
-    return nullptr;
+    return Director::getInstance()->getDefaultCamera();
 }
 
 Camera* Camera::create()

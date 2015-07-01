@@ -490,6 +490,8 @@ public:
     
     experimental::FrameBuffer* getDefaultFBO() const { return _defaultFBO; }
     
+    Camera* getDefaultCamera() const;
+    
 protected:
     void reset();
     
@@ -602,7 +604,9 @@ protected:
     
     /* Default FrameBufferObject*/
     experimental::FrameBuffer* _defaultFBO;
-
+    
+    Camera* _defaultCamera;
+    
     /* Console for the director */
     Console *_console;
 
