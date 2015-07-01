@@ -129,8 +129,8 @@ CameraRotationTest::CameraRotationTest()
         Vec3 worldPos;
         _camNode->getNodeToWorldTransform().getTranslation(&worldPos);
 
-        Camera::getDefaultCamera()->setPosition3D(worldPos);
-        Camera::getDefaultCamera()->lookAt(_camControlNode->getPosition3D());
+//        Camera::getDefaultCamera()->setPosition3D(worldPos);
+//        Camera::getDefaultCamera()->lookAt(_camControlNode->getPosition3D());
     };
 
     Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(_lis, this);

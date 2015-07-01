@@ -111,7 +111,8 @@ bool Scene3DTestScene::init()
         _gameCameras[LAYER_GAME] = ca;
         
         // third, use the default camera to look 2D base UI layer
-        ca =this->getDefaultCamera();
+        //ca =this->getDefaultCamera();
+        ca = Camera::create();
         ca->setCameraFlag(s_CF[LAYER_UI]);
         ca->setDepth(LAYER_UI);
         _gameCameras[LAYER_UI] = ca;
