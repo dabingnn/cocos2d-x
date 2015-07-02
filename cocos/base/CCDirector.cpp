@@ -295,7 +295,8 @@ void Director::drawScene()
         _renderer->clearDrawStats();
         
         //render the scene
-        _runningScene->render(_renderer);
+        //_runningScene->render(_renderer);
+        _runningScene->renderWithFrameBuffer(_defaultFBO);
         
         _eventDispatcher->dispatchEvent(_eventAfterVisit);
     }
@@ -404,6 +405,9 @@ void Director::setOpenGLView(GLView *openGLView)
         
         _defaultFBO = experimental::FrameBuffer::create(_openGLView);
         _defaultFBO->retain();
+        
+        _defaultCamera->setFrameBufferObject(_defaultFBO);
+        //_defaultFBO->addRenderCamera(_defaultCamera);
     }
 }
 
