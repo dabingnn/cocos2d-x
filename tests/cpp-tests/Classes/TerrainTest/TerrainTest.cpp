@@ -79,13 +79,26 @@ void TerrainSimple::onTouchesMoved(const std::vector<cocos2d::Touch*>& touches, 
 TerrainVR::TerrainVR()
 {
     Size visibleSize = Director::getInstance()->getVisibleSize();
+    auto vp = Camera::getDefaultViewport();
     
     //use custom camera
     _camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.1f,800);
     _camera->setCameraFlag(CameraFlag::USER1);
     _camera->setPosition3D(Vec3(-1,1.6f,4));
     _camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+    _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+    _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
     addChild(_camera);
+    
+    {
+        auto camera2 = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.1f,800);
+        camera2->setCameraFlag(CameraFlag::USER2);
+        camera2->setPosition3D(Vec3(-1,1.6f,4));
+        camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+        camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+        camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
+        addChild(camera2);
+    }
     
     Terrain::DetailMap r("TerrainTest/dirt.jpg"),g("TerrainTest/Grass2.jpg"),b("TerrainTest/road.jpg"),a("TerrainTest/GreenSkin.jpg");
     
@@ -95,7 +108,7 @@ TerrainVR::TerrainVR()
     _terrain->setLODDistance(3.2f,6.4f,9.6f);
     _terrain->setMaxDetailMapAmount(4);
     addChild(_terrain);
-    _terrain->setCameraMask(2);
+    _terrain->setCameraMask(6);
     _terrain->setDrawWire(false);
     
     // add Particle3D for test blend
