@@ -108,12 +108,12 @@ TerrainVR::TerrainVR()
     _terrain->setLODDistance(3.2f,6.4f,9.6f);
     _terrain->setMaxDetailMapAmount(4);
     addChild(_terrain);
-    _terrain->setCameraMask(6);
+    _terrain->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
     _terrain->setDrawWire(false);
     
     // add Particle3D for test blend
     auto rootps = PUParticleSystem3D::create("Particle3D/scripts/mp_torch.pu");
-    rootps->setCameraMask((unsigned short)CameraFlag::USER1);
+    rootps->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
     rootps->startParticleSystem();
     
     this->addChild(rootps, 0, 0);
