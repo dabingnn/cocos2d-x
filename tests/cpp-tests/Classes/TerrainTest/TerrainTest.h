@@ -38,6 +38,10 @@ public:
     cocos2d::Terrain* _terrain;
 protected:
     cocos2d::Camera* _camera;
+    cocos2d::Camera* _camera2;
+    cocos2d::Node* _headNode;
+    void onToucheMoved(const cocos2d::Touch* touches, cocos2d::Event* event);
+    bool onTouchesBegan(const cocos2d::Touch* touches, cocos2d::Event* event);
 };
 
 #define PLAYER_STATE_LEFT 0 

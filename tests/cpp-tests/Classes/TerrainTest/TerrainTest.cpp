@@ -80,25 +80,58 @@ TerrainVR::TerrainVR()
 {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     auto vp = Camera::getDefaultViewport();
+    auto node = Node::create();
+    _headNode = node;
+    node->setPosition3D(Vec3(-1,1.6f,4));
+    
+//    {
+//        auto moveBy = MoveBy::create(2.0, Vec3(2, 0, 2));
+//        node->runAction(
+//                        RepeatForever::create(Sequence::createWithTwoActions(moveBy, moveBy->reverse())));
+//    }
     
     //use custom camera
-    _camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.1f,800);
-    _camera->setCameraFlag(CameraFlag::USER1);
-    _camera->setPosition3D(Vec3(-1,1.6f,4));
-    _camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
-    _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
-    _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
-    addChild(_camera);
-    
     {
-        auto camera2 = Camera::createPerspective(60,visibleSize.width/visibleSize.height,0.1f,800);
-        camera2->setCameraFlag(CameraFlag::USER2);
-        camera2->setPosition3D(Vec3(-1,1.6f,4));
-        camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
-        camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
-        camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
-        addChild(camera2);
+        _camera = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+        _camera->setCameraFlag(CameraFlag::USER1);
+        //_camera->setPosition3D(Vec3(-1.01,1.6f,4));
+        
+        _camera->setPosition3D(Vec3(-0.01,0,0));
+        _camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+        _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+        _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
+        node->addChild(_camera);
+    
+        _camera2 = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+        _camera2->setCameraFlag(CameraFlag::USER2);
+        //camera2->setPosition3D(Vec3(-0.9,1.6f,4));
+
+        _camera2->setPosition3D(Vec3(0.01,0,0));
+        
+        _camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+        _camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+        _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
+        node->addChild(_camera2);
     }
+    
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->onTouchMoved = CC_CALLBACK_2(TerrainVR::onToucheMoved,this);
+    listener->onTouchBegan = CC_CALLBACK_2(TerrainVR::onTouchesBegan,this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    
+    addChild(node);
+    
+    auto player = Sprite3D::create("Sprite3DTest/girl.c3b");
+    player->setCameraMask(2);
+    player->setScale(0.008f);
+//    auto moveBy = MoveBy::create(2.0, Vec3(6, 0, 2));
+    auto pos = player->getPosition3D();
+    player->setPosition3D(pos + Vec3(-4,1,0));
+//    player->runAction(
+//                      RepeatForever::create(Sequence::createWithTwoActions(moveBy, moveBy->reverse()))
+//    );
+    addChild(player);
+    player->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
     
     Terrain::DetailMap r("TerrainTest/dirt.jpg"),g("TerrainTest/Grass2.jpg"),b("TerrainTest/road.jpg"),a("TerrainTest/GreenSkin.jpg");
     
@@ -117,6 +150,43 @@ TerrainVR::TerrainVR()
     rootps->startParticleSystem();
     
     this->addChild(rootps, 0, 0);
+    
+    {
+        Device::setAccelerometerEnabled(true);
+        auto listener = EventListenerAcceleration::create([this](Acceleration* acc, Event* event){
+            CCLOG("receive Acceleration Event %f %f %f %f", acc->timestamp, acc->x, acc->y, acc->z);
+            //const float step = 0.3f;
+            //Vec3 r = _headNode->getRotation3D();
+            //r.x += step * touches->getDelta().y;
+            //r.y += step * touches->getDelta().x;
+            //Vec3 r()
+            //_headNode->setRotation3D(r);
+            
+        });
+        _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+    }
+    
+}
+
+void TerrainVR::onToucheMoved(const cocos2d::Touch *touches, cocos2d::Event *event)
+{
+    const float step = 0.3f;
+    //Quaternion q(Vec3(0,1,0),step * touches->getDelta().x);
+    //Quaternion q2(Vec3(1,0,0),step * touches->getDelta().y);
+    //q =  q2 * q * _headNode->getRotationQuat();
+    //_headNode->setRotationQuat(q);
+    Vec3 r = _headNode->getRotation3D();
+    r.x += step * touches->getDelta().y;
+    r.y += step * touches->getDelta().x;
+    _headNode->setRotation3D(r);
+
+    CCLOG("touched moved.");
+}
+
+bool TerrainVR::onTouchesBegan(const cocos2d::Touch *touches, cocos2d::Event *event)
+{
+    CCLOG("touched begin.");
+    return true;
 }
 
 std::string TerrainVR::title() const
