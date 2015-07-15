@@ -18,5 +18,16 @@ extern "C" {
 
         EventAcceleration event(a);
         Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
-    }    
+    }
+
+	JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxGyroscope_onSensorChanged(JNIEnv*  env, jobject thiz, jfloat x, jfloat y, jfloat z, jlong timeStamp) {
+        Gyroscope a;
+        a.x = x;
+        a.y = y;
+        a.z = z;
+        a.timestamp = (double)timeStamp;
+
+        EventGyroscope event(a);
+        Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
+    }
 }

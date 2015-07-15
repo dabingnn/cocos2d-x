@@ -74,6 +74,9 @@ static EventListener::ListenerID __getListenerID(Event* event)
         case Event::Type::ACCELERATION:
             ret = EventListenerAcceleration::LISTENER_ID;
             break;
+        case Event::Type::GYROSCOPE:
+            ret = EventListenerGyroscope::LISTENER_ID;
+            break;
         case Event::Type::CUSTOM:
             {
                 auto customEvent = static_cast<EventCustom*>(event);

@@ -70,6 +70,36 @@ private:
     friend class LuaEventListenerAcceleration;
 };
 
+class CC_DLL EventListenerGyroscope : public EventListener
+{
+public:
+    static const std::string LISTENER_ID;
+    
+    /** Create a acceleration EventListener.
+     *
+     * @param callback The acceleration callback method.
+     * @return An autoreleased EventListenerAcceleration object.
+     */
+    static EventListenerGyroscope* create(const std::function<void(Gyroscope*, Event*)>& callback);
+    
+    /** Destructor.
+     */
+    virtual ~EventListenerGyroscope();
+    
+    /// Overrides
+    virtual EventListenerGyroscope* clone() override;
+    virtual bool checkAvailable() override;
+    
+CC_CONSTRUCTOR_ACCESS:
+    EventListenerGyroscope();
+    
+    bool init(const std::function<void(Gyroscope*, Event* event)>& callback);
+    
+private:
+    std::function<void(Gyroscope*, Event*)> onGyroscopeEvent;
+    
+};
+
 NS_CC_END
 
 // end of base group

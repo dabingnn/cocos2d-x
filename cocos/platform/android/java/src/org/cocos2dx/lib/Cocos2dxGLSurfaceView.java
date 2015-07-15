@@ -127,8 +127,18 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
                 Cocos2dxAccelerometer.onSensorChanged(x, y, z, timestamp);
         }
         });
-    }
 
+
+    }
+       public static void queueGyroscope(final float x, final float y, final float z, final long timestamp) {   
+       mCocos2dxGLSurfaceView.queueEvent(new Runnable() {
+        @Override
+            public void run() {
+                Cocos2dxGyroscope.onSensorChanged(x, y, z, timestamp);
+        }
+        });
+    }
+    
     public void setCocos2dxRenderer(final Cocos2dxRenderer renderer) {
         this.mCocos2dxRenderer = renderer;
         this.setRenderer(this.mCocos2dxRenderer);

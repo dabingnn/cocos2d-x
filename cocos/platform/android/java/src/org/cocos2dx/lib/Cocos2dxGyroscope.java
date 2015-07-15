@@ -97,11 +97,12 @@ public class Cocos2dxGyroscope implements SensorEventListener {
         {
             return;
         }
-        Log.v(TAG, "SensorEvent value is:" + sensorEvent.values[0] 
-            + " " + sensorEvent.values[1] + " " + sensorEvent.values[2]);
-        // float x = sensorEvent.values[0];
-        // float y = sensorEvent.values[1];
-        // final float z = sensorEvent.values[2];
+
+        float x = sensorEvent.values[0];
+        float y = sensorEvent.values[1];
+        final float z = sensorEvent.values[2];
+
+        Cocos2dxGLSurfaceView.queueGyroscope(x,y,z,sensorEvent.timestamp);
 
         // /*
         //  * Because the axes are not swapped when the device's screen orientation
@@ -138,7 +139,7 @@ public class Cocos2dxGyroscope implements SensorEventListener {
         // Native method called from Cocos2dxGLSurfaceView (To be in the same thread)
     // ===========================================================
     
-    //public static native void onSensorChanged(final float x, final float y, final float z, final int type,final long timestamp);
+    public static native void onSensorChanged(final float x, final float y, final float z, final long timestamp);
 
     // ===========================================================
     // Inner and Anonymous Classes

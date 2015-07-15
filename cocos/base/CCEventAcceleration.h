@@ -52,6 +52,15 @@ private:
     friend class EventListenerAcceleration;
 };
 
+class CC_DLL EventGyroscope : public Event
+{
+public:
+	EventGyroscope(const Gyroscope& val);
+private:
+	Gyroscope _val;
+	friend class EventListenerGyroscope;
+};
+
 NS_CC_END
 
 // end of base group

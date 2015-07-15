@@ -59,6 +59,7 @@ public:
         KEYBOARD,
         MOUSE,
         ACCELERATION,
+        GYROSCOPE,
         FOCUS,
 		GAME_CONTROLLER,
         CUSTOM
