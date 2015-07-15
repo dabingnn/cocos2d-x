@@ -65,6 +65,23 @@ void Device::setAccelerometerInterval(float interval)
     setAccelerometerIntervalJni(interval);
 }
 
+void Device::setGyroscopeEnabled(bool isEnabled)
+{
+    if (isEnabled)
+    {
+        enableGyroscopeJni();
+    }
+    else
+    {
+        disableGyroscopeJni();
+    }
+}
+
+void Device::setGyroscopeInterval(float interval)
+{
+    setGyroscopeIntervalJni(interval);
+}
+
 class BitmapDC
 {
 public:

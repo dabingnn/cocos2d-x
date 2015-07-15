@@ -77,6 +77,16 @@ public:
     static void setAccelerometerInterval(float interval);
 
     /**
+     * To enable or disable Gyroscope.
+     */
+    static void setGyroscopeEnabled(bool isEnabled);
+
+    /**
+     *  Sets the interval of Gyroscope.
+     */
+    static void setGyroscopeInterval(float interval);
+
+    /**
      * Controls whether the screen should remain on.
      * 
      * @param keepScreenOn One flag indicating that the screen should remain on.
