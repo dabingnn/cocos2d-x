@@ -8,6 +8,7 @@ import shutil
 import excopy
 import json
 import utils_cocos
+import gen_prebuilt_mk
 
 from custom_error import CustomError
 from custom_error import Logging
@@ -21,11 +22,13 @@ class CocosLibsCompiler(object):
     KEY_XCODE_PROJS_INFO = 'xcode_projs_info'
     KEY_VS_PROJS_INFO = 'vs_projs_info'
     KEY_SUPPORT_VS_VERSIONS = 'support_vs_versions'
+    KEY_ANDROID_MKS = "android_mks"
     CHECK_KEYS = [
         KEY_LIBS_OUTPUT,
         KEY_XCODE_PROJS_INFO,
         KEY_VS_PROJS_INFO,
-        KEY_SUPPORT_VS_VERSIONS
+        KEY_SUPPORT_VS_VERSIONS,
+        KEY_ANDROID_MKS
     ]
 
     KEY_XCODE_TARGETS = 'targets'
@@ -42,6 +45,7 @@ class CocosLibsCompiler(object):
         self.clean = args.clean
         self.build_win = args.win
         self.build_mac = args.mac
+        self.build_ios = args.ios
         self.build_android = args.android
         self.disable_strip = args.disable_strip
         self.repo_x = args.repo_x
@@ -50,6 +54,7 @@ class CocosLibsCompiler(object):
         if args.all:
             self.build_win = True
             self.build_mac = True
+            self.build_ios = True
             self.build_android = True
 
         if args.app_abi is None:
@@ -84,12 +89,12 @@ class CocosLibsCompiler(object):
             self.clean_libs()
         if self.build_win:
             self.compile_win()
-        if self.build_mac:
+        if self.build_mac or self.build_ios:
             self.compile_mac_ios()
         if self.build_android:
-            self.compile_android("js")
-            self.compile_android("lua")
-
+            self.compile_android()
+            # generate prebuilt mk files
+            self.modify_binary_mk()
 
     def build_win32_proj(self, cmd_path, sln_path, proj_name, mode):
         build_cmd = " ".join([
@@ -226,36 +231,38 @@ class CocosLibsCompiler(object):
         xcode_proj_info = self.cfg_info[CocosLibsCompiler.KEY_XCODE_PROJS_INFO]
 
         XCODE_CMD_FMT = "xcodebuild -project \"%s\" -configuration Release -target \"%s\" %s CONFIGURATION_BUILD_DIR=%s"
+        ios_out_dir = os.path.join(self.lib_dir, "ios")
+        mac_out_dir = os.path.join(self.lib_dir, "mac")
+        ios_sim_libs_dir = os.path.join(ios_out_dir, "simulator")
+        ios_dev_libs_dir = os.path.join(ios_out_dir, "device")
         for key in xcode_proj_info.keys():
             proj_path = os.path.join(self.repo_x, key)
-            ios_out_dir = os.path.join(self.lib_dir, "ios")
-            mac_out_dir = os.path.join(self.lib_dir, "mac")
-            ios_sim_libs_dir = os.path.join(ios_out_dir, "simulator")
-            ios_dev_libs_dir = os.path.join(ios_out_dir, "device")
-
             target = xcode_proj_info[key][CocosLibsCompiler.KEY_XCODE_TARGETS]
 
-            # compile ios simulator
-            build_cmd = XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphonesimulator ARCHS=\"i386 x86_64\" VALID_ARCHS=\"i386 x86_64\"", ios_sim_libs_dir)
-            retVal = utils_cocos.execute_command(build_cmd)
-            if 0 != retVal:
-                print("[ERROR] compile ios simulator fail")
-                return retVal
+            if self.build_mac:
+                # compile mac
+                build_cmd = XCODE_CMD_FMT % (proj_path, "%s Mac" % target, "", mac_out_dir)
+                retVal = utils_cocos.execute_command(build_cmd)
+                if 0 != retVal:
+                    print("[ERROR] compile mac fail")
+                    return retVal
 
-            # compile ios device
-            build_cmd = XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphoneos", ios_dev_libs_dir)
-            retVal = utils_cocos.execute_command(build_cmd)
-            if 0 != retVal:
-                print("[ERROR] compile ios device fail")
-                return retVal
+            if self.build_ios:
+                # compile ios simulator
+                build_cmd = XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphonesimulator ARCHS=\"i386 x86_64\" VALID_ARCHS=\"i386 x86_64\"", ios_sim_libs_dir)
+                retVal = utils_cocos.execute_command(build_cmd)
+                if 0 != retVal:
+                    print("[ERROR] compile ios simulator fail")
+                    return retVal
 
-            # compile mac
-            build_cmd = XCODE_CMD_FMT % (proj_path, "%s Mac" % target, "", mac_out_dir)
-            retVal = utils_cocos.execute_command(build_cmd)
-            if 0 != retVal:
-                print("[ERROR] compile mac fail")
-                return retVal
+                # compile ios device
+                build_cmd = XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphoneos", ios_dev_libs_dir)
+                retVal = utils_cocos.execute_command(build_cmd)
+                if 0 != retVal:
+                    print("[ERROR] compile ios device fail")
+                    return retVal
 
+        if self.build_ios:
             # generate fat libs for iOS
             for lib in os.listdir(ios_sim_libs_dir):
                 sim_lib = os.path.join(ios_sim_libs_dir, lib)
@@ -269,14 +276,16 @@ class CocosLibsCompiler(object):
             utils_cocos.rmdir(ios_sim_libs_dir)
             utils_cocos.rmdir(ios_dev_libs_dir)
 
-            if not self.disable_strip:
-                # strip the libs
+        if not self.disable_strip:
+            # strip the libs
+            if self.build_ios:
                 ios_strip_cmd = "xcrun -sdk iphoneos strip -S %s/*.a" % ios_out_dir
                 utils_cocos.execute_command(ios_strip_cmd)
+            if self.build_mac:
                 mac_strip_cmd = "xcrun strip -S %s/*.a" % mac_out_dir
                 utils_cocos.execute_command(mac_strip_cmd)
 
-    def compile_android(self, language):
+    def compile_android(self):
         print("compile android")
         # build .so for android
         CONSOLE_PATH = "tools/cocos2d-console/bin"
@@ -290,17 +299,9 @@ class CocosLibsCompiler(object):
         else:
             cmd_path = os.path.join(console_dir, "cocos")
 
-        proj_name = "My%sGame" % language
-        proj_dir = engine_dir
-        proj_path = os.path.join(proj_dir, proj_name)
-        utils_cocos.rmdir(proj_path)
-
-        # create a runtime project
-        create_cmd = "%s new -l %s -t runtime -d %s %s" % (cmd_path, language, proj_dir, proj_name)
-        utils_cocos.execute_command(create_cmd)
-
-        # build it
-        build_cmd = "%s compile -s %s -p android --ndk-mode release -j 4 --app-abi %s" % (cmd_path, proj_path, self.app_abi)
+        # build the simulator project
+        proj_path = os.path.join(engine_dir, 'tools/simulator')
+        build_cmd = "%s compile -s %s -p android --ndk-mode release --app-abi %s" % (cmd_path, proj_path, self.app_abi)
         utils_cocos.execute_command(build_cmd)
 
         # copy .a to prebuilt dir
@@ -348,9 +349,6 @@ class CocosLibsCompiler(object):
             if os.path.exists(strip_cmd_path) and os.path.exists(os.path.join(android_out_dir, "x86")):
                 self.trip_libs(strip_cmd_path, os.path.join(android_out_dir, 'x86'))
 
-        # remove the project
-        utils_cocos.rmdir(proj_path)
-
     def trip_libs(self, strip_cmd, folder):
         if not os.path.isdir(folder):
             return
@@ -366,6 +364,16 @@ class CocosLibsCompiler(object):
             strip_cmd = "%s -S %s/*.a" % (strip_cmd, folder)
             utils_cocos.execute_command(strip_cmd)
 
+    def modify_binary_mk(self):
+        android_libs = os.path.join(self.lib_dir, "android")
+        android_mks = self.cfg_info[CocosLibsCompiler.KEY_ANDROID_MKS]
+        for mk_file in android_mks:
+            mk_file_path = os.path.join(self.repo_x, mk_file)
+            print('gen %s' % mk_file_path)
+            dst_file_path = os.path.join(os.path.dirname(mk_file_path), "prebuilt-mk", os.path.basename(mk_file_path))
+            tmp_obj = gen_prebuilt_mk.MKGenerator(mk_file_path, android_libs, dst_file_path)
+            tmp_obj.do_generate()
+
     def clean_libs(self):
         print("to clean libs")
         utils_cocos.rmdir(self.lib_dir)
@@ -376,7 +384,8 @@ if __name__ == "__main__":
     parser.add_argument('-c', dest='clean', action="store_true", help='clean libs folder')
     parser.add_argument('-all', dest='all', action="store_true", help='compile all platform')
     parser.add_argument('--win', dest='win', action="store_true", help='compile windows platform')
-    parser.add_argument('--mac', dest='mac', action="store_true", help='compile mac platform')
+    parser.add_argument('--mac', dest='mac', action="store_true", help='compile Mac platform')
+    parser.add_argument('--ios', dest='ios', action="store_true", help='compile iOS platform')
     parser.add_argument('--android', dest='android', action="store_true",help='complile android platform')
     parser.add_argument('--dis-strip', "--disable-strip", dest='disable_strip', action="store_true", help='Disable the strip of the generated libs.')
     parser.add_argument('--vs', dest='vs_version', type=int, help='visual studio version, such as 2013.', default=None)

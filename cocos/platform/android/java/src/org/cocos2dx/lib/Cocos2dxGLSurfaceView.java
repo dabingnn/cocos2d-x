@@ -127,8 +127,18 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
                 Cocos2dxAccelerometer.onSensorChanged(x, y, z, timestamp);
         }
         });
-    }
 
+
+    }
+       public static void queueGyroscope(final float x, final float y, final float z, final long deltaTime) {   
+       mCocos2dxGLSurfaceView.queueEvent(new Runnable() {
+        @Override
+            public void run() {
+                Cocos2dxGyroscope.onSensorChanged(x, y, z, deltaTime);
+        }
+        });
+    }
+    
     public void setCocos2dxRenderer(final Cocos2dxRenderer renderer) {
         this.mCocos2dxRenderer = renderer;
         this.setRenderer(this.mCocos2dxRenderer);
@@ -310,6 +320,30 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
                 return true;
             default:
                 return super.onKeyDown(pKeyCode, pKeyEvent);
+        }
+    }
+
+    @Override
+    public boolean onKeyUp(final int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_MENU:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_ENTER:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                this.queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        Cocos2dxGLSurfaceView.this.mCocos2dxRenderer.handleKeyUp(keyCode);
+                    }
+                });
+                return true;
+            default:
+                return super.onKeyUp(keyCode, event);
         }
     }
 

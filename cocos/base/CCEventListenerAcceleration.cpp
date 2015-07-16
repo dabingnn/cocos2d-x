@@ -29,6 +29,7 @@
 NS_CC_BEGIN
 
 const std::string EventListenerAcceleration::LISTENER_ID = "__cc_acceleration";
+const std::string EventListenerGyroscope::LISTENER_ID = "__cc_gyroscope";
 
 EventListenerAcceleration::EventListenerAcceleration()
 {
@@ -90,6 +91,70 @@ EventListenerAcceleration* EventListenerAcceleration::clone()
 bool EventListenerAcceleration::checkAvailable()
 {
     CCASSERT(onAccelerationEvent, "");
+    
+    return true;
+}
+
+EventListenerGyroscope::EventListenerGyroscope()
+{
+    
+}
+
+EventListenerGyroscope::~EventListenerGyroscope()
+{
+    CCLOGINFO("In the destructor of GyroscopeEventListener. %p", this);
+}
+
+EventListenerGyroscope* EventListenerGyroscope::create(const std::function<void(Gyroscope*, Event*)>& callback)
+{
+    auto ret = new (std::nothrow) EventListenerGyroscope();
+    if (ret && ret->init(callback))
+    {
+        ret->autorelease();
+    }
+    else
+    {
+        CC_SAFE_DELETE(ret);
+    }
+    
+    return ret;
+}
+
+bool EventListenerGyroscope::init(const std::function<void(Gyroscope*, Event* event)>& callback)
+{
+    auto listener = [this](Event* event){
+        auto gyroEvent = static_cast<EventGyroscope*>(event);
+        this->onGyroscopeEvent(&gyroEvent->_val, event);
+    };
+    
+    if (EventListener::init(Type::GYROSCOPE, LISTENER_ID, listener))
+    {
+        onGyroscopeEvent = callback;
+        return true;
+    }
+    
+    return false;
+}
+
+EventListenerGyroscope* EventListenerGyroscope::clone()
+{
+    auto ret = new (std::nothrow) EventListenerGyroscope();
+    
+    if (ret && ret->init(onGyroscopeEvent))
+    {
+        ret->autorelease();
+    }
+    else
+    {
+        CC_SAFE_DELETE(ret);
+    }
+    
+    return ret;
+}
+
+bool EventListenerGyroscope::checkAvailable()
+{
+    CCASSERT(onGyroscopeEvent, "");
     
     return true;
 }

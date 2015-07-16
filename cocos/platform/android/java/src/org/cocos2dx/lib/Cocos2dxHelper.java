@@ -43,6 +43,7 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;  //Enhance API modification
+import android.os.Vibrator;
 import android.preference.PreferenceManager.OnActivityResultListener;
 import android.util.DisplayMetrics;
 import android.util.Log;  //Enhance API modification
@@ -68,12 +69,15 @@ public class Cocos2dxHelper {
     private static AssetManager sAssetManager;
     private static Cocos2dxAccelerometer sCocos2dxAccelerometer;
     private static boolean sAccelerometerEnabled;
+    private static Cocos2dxGyroscope sCocos2dxGyroscope;
+    private static boolean sGyroscopeEnabled;
     private static boolean sActivityVisible;
     private static String sPackageName;
     private static String sFileDirectory;
     private static Activity sActivity = null;
     private static Cocos2dxHelperListener sCocos2dxHelperListener;
     private static Set<OnActivityResultListener> onActivityResultListeners = new LinkedHashSet<OnActivityResultListener>();
+    private static Vibrator sVibrateService = null;
     //Enhance API modification begin
     private static IGameTuningService mGameServiceBinder = null;
     private static final int BOOST_TIME = 7;
@@ -105,6 +109,7 @@ public class Cocos2dxHelper {
             Cocos2dxHelper.nativeSetApkPath(applicationInfo.sourceDir);
     
             Cocos2dxHelper.sCocos2dxAccelerometer = new Cocos2dxAccelerometer(activity);
+            Cocos2dxHelper.sCocos2dxGyroscope = new Cocos2dxGyroscope(activity);
             Cocos2dxHelper.sCocos2dMusic = new Cocos2dxMusic(activity);
             Cocos2dxHelper.sCocos2dSound = new Cocos2dxSound(activity);
             Cocos2dxHelper.sAssetManager = activity.getAssets();
@@ -112,6 +117,8 @@ public class Cocos2dxHelper {
     
             Cocos2dxBitmap.setContext(activity);
             sActivity = activity;
+
+            Cocos2dxHelper.sVibrateService = (Vibrator)activity.getSystemService(Context.VIBRATOR_SERVICE);
 
             sInited = true;
             
@@ -204,11 +211,30 @@ public class Cocos2dxHelper {
         Cocos2dxHelper.sAccelerometerEnabled = false;
         Cocos2dxHelper.sCocos2dxAccelerometer.disable();
     }
-    
+
+    public static void enableGyroscope() {
+        Cocos2dxHelper.sGyroscopeEnabled = true;
+        Cocos2dxHelper.sCocos2dxGyroscope.enable();
+    }
+
+
+    public static void setGyroscopeInterval(float interval) {
+        Cocos2dxHelper.sCocos2dxGyroscope.setInterval(interval);
+    }
+
+    public static void disableGyroscope() {
+        Cocos2dxHelper.sGyroscopeEnabled = false;
+        Cocos2dxHelper.sCocos2dxGyroscope.disable();
+    }
+
     public static void setKeepScreenOn(boolean value) {
         ((Cocos2dxActivity)sActivity).setKeepScreenOn(value);
     }
-    
+
+    public static void vibrate(float duration) {
+        sVibrateService.vibrate((long)(duration * 1000));
+    }
+
     public static boolean openURL(String url) { 
         boolean ret = false;
         try {
@@ -311,12 +337,20 @@ public class Cocos2dxHelper {
         if (Cocos2dxHelper.sAccelerometerEnabled) {
             Cocos2dxHelper.sCocos2dxAccelerometer.enable();
         }
+        if(Cocos2dxHelper.sGyroscopeEnabled)
+        {
+            Cocos2dxHelper.sCocos2dxGyroscope.enable();
+        }
     }
 
     public static void onPause() {
         sActivityVisible = false;
         if (Cocos2dxHelper.sAccelerometerEnabled) {
             Cocos2dxHelper.sCocos2dxAccelerometer.disable();
+        }
+        if(Cocos2dxHelper.sGyroscopeEnabled)
+        {
+            Cocos2dxHelper.sCocos2dxGyroscope.disable();
         }
     }
 
@@ -515,6 +549,13 @@ public class Cocos2dxHelper {
         SharedPreferences settings = sActivity.getSharedPreferences(Cocos2dxHelper.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(key, value);
+        editor.commit();
+    }
+    
+    public static void deleteValueForKey(String key) {
+        SharedPreferences settings = sActivity.getSharedPreferences(Cocos2dxHelper.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove(key);
         editor.commit();
     }
     

@@ -576,6 +576,22 @@ public:
     Acceleration(): x(0), y(0), z(0), timestamp(0) {}
 };
 
+/** @struct Gyroscope
+ * The device Gyroscope reports values for each axis
+ */
+class CC_DLL Gyroscope
+    : public Ref
+{
+public:
+    double x;
+    double y;
+    double z;
+
+    double deltaTime;
+
+    Gyroscope(): x(0), y(0), z(0), deltaTime(0) {}
+};
+
 extern const std::string CC_DLL STD_STRING_EMPTY;
 extern const ssize_t CC_DLL CC_INVALID_INDEX;
 

@@ -50,6 +50,7 @@ public:
         TOUCH,
         KEYBOARD,
         ACCELERATION,
+        GYROSCOPE,
         MOUSE,
         FOCUS,
         GAME_CONTROLLER,

@@ -32,4 +32,10 @@ EventAcceleration::EventAcceleration(const Acceleration& acc)
 {
 }
 
+EventGyroscope::EventGyroscope(const Gyroscope& val)
+: Event(Type::GYROSCOPE)
+, _val(val)
+{
+}
+
 NS_CC_END

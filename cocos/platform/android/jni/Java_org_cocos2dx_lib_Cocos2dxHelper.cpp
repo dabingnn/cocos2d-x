@@ -209,11 +209,48 @@ void disableAccelerometerJni() {
     }
 }
 
+void enableGyroscopeJni() {
+    JniMethodInfo t;
+
+    if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "enableGyroscope", "()V")) {
+        t.env->CallStaticVoidMethod(t.classID, t.methodID);
+        t.env->DeleteLocalRef(t.classID);
+    }
+}
+
+void setGyroscopeIntervalJni(float interval) {
+    JniMethodInfo t;
+
+    if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "setGyroscopeInterval", "(F)V")) {
+        t.env->CallStaticVoidMethod(t.classID, t.methodID, interval);
+        t.env->DeleteLocalRef(t.classID);
+    }
+}
+
+void disableGyroscopeJni() {
+    JniMethodInfo t;
+
+    if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "disableGyroscope", "()V")) {
+        t.env->CallStaticVoidMethod(t.classID, t.methodID);
+        t.env->DeleteLocalRef(t.classID);
+    }
+}
+
 void setKeepScreenOnJni(bool value) {
     JniMethodInfo t;
     
     if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "setKeepScreenOn", "(Z)V")) {
         t.env->CallStaticVoidMethod(t.classID, t.methodID, value);
+        
+        t.env->DeleteLocalRef(t.classID);
+    }
+}
+
+void vibrateJni(float duration) {
+    JniMethodInfo t;
+    
+    if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "vibrate", "(F)V")) {
+        t.env->CallStaticVoidMethod(t.classID, t.methodID, duration);
         
         t.env->DeleteLocalRef(t.classID);
     }
@@ -388,5 +425,18 @@ void setStringForKeyJNI(const char* key, const char* value)
         t.env->DeleteLocalRef(t.classID);
         t.env->DeleteLocalRef(stringArg1);
         t.env->DeleteLocalRef(stringArg2);
+    }
+}
+
+void deleteValueForKeyJNI(const char* key)
+{
+    JniMethodInfo t;
+    
+    if (JniHelper::getStaticMethodInfo(t, CLASS_NAME, "deleteValueForKey", "(Ljava/lang/String;)V")) {
+        jstring stringArg1 = t.env->NewStringUTF(key);
+        t.env->CallStaticVoidMethod(t.classID, t.methodID, stringArg1);
+        
+        t.env->DeleteLocalRef(t.classID);
+        t.env->DeleteLocalRef(stringArg1);
     }
 }
