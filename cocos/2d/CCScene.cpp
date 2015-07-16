@@ -157,6 +157,16 @@ static bool camera_cmp(const Camera* a, const Camera* b)
     return a->getRenderOrder() < b->getRenderOrder();
 }
 
+const std::vector<Camera*>& Scene::getCameras()
+{
+    if (_cameraOrderDirty)
+    {
+        stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
+        _cameraOrderDirty = false;
+    }
+    return _cameras;
+}
+
 const Camera* Scene::getDefaultCamera() const
 {
     return Director::getInstance()->getDefaultCamera();
@@ -167,13 +177,12 @@ void Scene::render(Renderer* renderer)
     auto director = Director::getInstance();
     Camera* defaultCamera = nullptr;
     const auto& transform = getNodeToParentTransform();
-    std::vector<Camera*> cameras = _cameras;
+    std::vector<Camera*> cameras = getCameras();
     cameras.push_back(Director::getInstance()->getDefaultCamera());
     
     //if (_cameraOrderDirty)
     {
         stable_sort(cameras.begin(), cameras.end(), camera_cmp);
-        _cameraOrderDirty = false;
     }
     
     for (const auto& camera : cameras)
