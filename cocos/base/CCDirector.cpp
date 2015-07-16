@@ -941,6 +941,7 @@ void Director::reset()
     }
     
     _runningScene = nullptr;
+    if(_defaultCamera) _defaultCamera->setScene(nullptr);
     _nextScene = nullptr;
 
     // cleanup scheduler
@@ -1069,6 +1070,10 @@ void Director::setNextScene()
         _runningScene->release();
     }
     _runningScene = _nextScene;
+    if(_defaultCamera)
+    {
+        _defaultCamera->setScene(_runningScene);
+    }
     _nextScene->retain();
     _nextScene = nullptr;
 

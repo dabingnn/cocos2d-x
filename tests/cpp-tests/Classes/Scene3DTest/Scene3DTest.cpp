@@ -226,34 +226,6 @@ bool Scene3DTestScene::init()
         _gameCameras.resize(CAMERA_COUNT);
         auto visibleSize = Director::getInstance()->getVisibleSize();
         Camera *ca = nullptr;   // temp variable
-        // first, create a camera to look the skybox
-        ca = Camera::createPerspective(60, visibleSize.width / visibleSize.height, 10, 1000);
-        ca->setPosition3D(Vec3(0.f, 0.f, 50.f));
-        ca->setCameraFlag(s_CF[LAYER_SKYBOX]);
-        ca->setDepth(LAYER_SKYBOX);
-        _gameCameras[LAYER_SKYBOX] = ca;
-        this->addChild(ca);
-        
-        // second, create a camera to look the 3D game scene
-        // it has been create in TerrainWalkThru::init
-        ca = this->_camera;
-        ca->setCameraFlag(s_CF[LAYER_GAME]);
-        ca->setDepth(LAYER_GAME);
-        _gameCameras[LAYER_GAME] = ca;
-        
-        // third, use the default camera to look 2D base UI layer
-        //ca =this->getDefaultCamera();
-        ca = Camera::create();
-        ca->setCameraFlag(s_CF[LAYER_UI]);
-        ca->setDepth(LAYER_UI);
-        _gameCameras[LAYER_UI] = ca;
-
-        // forth, create a camera to look the 3D model in dialogs
-        ca = Camera::create();
-        ca->setCameraFlag(s_CF[LAYER_ACTOR]);
-        ca->setDepth(LAYER_ACTOR);
-        _gameCameras[LAYER_ACTOR] = ca;
-        this->addChild(ca);
         
         ////////////////////////////////////////////////////////////////////////
         // create world 3D scene, this scene has two camera
@@ -294,7 +266,7 @@ bool Scene3DTestScene::init()
         ////////////////////////////////////////////////////////////////////////
         // test scene is UI scene, use default camera
         // use the default camera to look 2D base UI layer
-        ca = _gameCameras[CAMERA_UI_2D] = this->getDefaultCamera();
+        ca = _gameCameras[CAMERA_UI_2D] = Director::getInstance()->getDefaultCamera();
         ca->setDepth(CAMERA_UI_2D);
         ca->setName(s_CameraNames[CAMERA_UI_2D]);
         // create UI element and add to ui scene
