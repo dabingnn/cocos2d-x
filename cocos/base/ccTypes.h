@@ -587,9 +587,9 @@ public:
     double y;
     double z;
 
-    double timestamp;
+    double deltaTime;
 
-    Gyroscope(): x(0), y(0), z(0), timestamp(0) {}
+    Gyroscope(): x(0), y(0), z(0), deltaTime(0) {}
 };
 
 extern const std::string CC_DLL STD_STRING_EMPTY;

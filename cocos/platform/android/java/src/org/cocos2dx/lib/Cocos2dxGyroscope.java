@@ -50,14 +50,16 @@ public class Cocos2dxGyroscope implements SensorEventListener {
     private final SensorManager mSensorManager;
     private final Sensor mGyroscope;
     private final int mNaturalOrientation;
-
+    private boolean mLastTimeStampSet;
+    private long mLastTimeStamp;
     // ===========================================================
     // Constructors
     // ===========================================================
 
     public Cocos2dxGyroscope(final Context context) {
         this.mContext = context;
-
+        this.mLastTimeStamp = 0;
+        this.mLastTimeStampSet = false;
         this.mSensorManager = (SensorManager) this.mContext.getSystemService(Context.SENSOR_SERVICE);
         this.mGyroscope = this.mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         final Display display = ((WindowManager) this.mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
@@ -97,32 +99,34 @@ public class Cocos2dxGyroscope implements SensorEventListener {
         {
             return;
         }
-
+        if(mLastTimeStampSet == false)
+        {
+            mLastTimeStampSet = true;
+            mLastTimeStamp = sensorEvent.timestamp;
+        }
         float x = sensorEvent.values[0];
         float y = sensorEvent.values[1];
         final float z = sensorEvent.values[2];
-
-        Cocos2dxGLSurfaceView.queueGyroscope(x,y,z,sensorEvent.timestamp);
 
         // /*
         //  * Because the axes are not swapped when the device's screen orientation
         //  * changes. So we should swap it here. In tablets such as Motorola Xoom,
         //  * the default orientation is landscape, so should consider this.
         //  */
-        // final int orientation = this.mContext.getResources().getConfiguration().orientation;
+        final int orientation = this.mContext.getResources().getConfiguration().orientation;
 
-        // if ((orientation == Configuration.ORIENTATION_LANDSCAPE) && (this.mNaturalOrientation != Surface.ROTATION_0)) {
-        //     final float tmp = x;
-        //     x = -y;
-        //     y = tmp;
-        // } else if ((orientation == Configuration.ORIENTATION_PORTRAIT) && (this.mNaturalOrientation != Surface.ROTATION_0)) {
-        //     final float tmp = x;
-        //     x = y;
-        //     y = -tmp;
-        // }       
+        if ((orientation == Configuration.ORIENTATION_LANDSCAPE) && (this.mNaturalOrientation != Surface.ROTATION_0)) {
+            final float tmp = x;
+            x = -y;
+            y = tmp;
+        } else if ((orientation == Configuration.ORIENTATION_PORTRAIT) && (this.mNaturalOrientation != Surface.ROTATION_0)) {
+            final float tmp = x;
+            x = y;
+            y = -tmp;
+        }       
         
-        // Cocos2dxGLSurfaceView.queueAccelerometer(x,y,z,type,sensorEvent.timestamp);
-        
+        Cocos2dxGLSurfaceView.queueGyroscope(x,y,z,sensorEvent.timestamp - mLastTimeStamp);
+        mLastTimeStamp = sensorEvent.timestamp;
         /*
         if(BuildConfig.DEBUG) {
             Log.d(TAG, "x = " + sensorEvent.values[0] + " y = " + sensorEvent.values[1] + " z = " + pSensorEvent.values[2]);
@@ -139,7 +143,7 @@ public class Cocos2dxGyroscope implements SensorEventListener {
         // Native method called from Cocos2dxGLSurfaceView (To be in the same thread)
     // ===========================================================
     
-    public static native void onSensorChanged(final float x, final float y, final float z, final long timestamp);
+    public static native void onSensorChanged(final float x, final float y, final float z, final long deltaTime);
 
     // ===========================================================
     // Inner and Anonymous Classes
