@@ -96,8 +96,8 @@ TerrainVR::TerrainVR()
         _camera->setCameraFlag(CameraFlag::USER1);
         //_camera->setPosition3D(Vec3(-1.01,1.6f,4));
         
-        _camera->setPosition3D(Vec3(-0.01,0,0));
-        _camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+        //_camera->setPosition3D(Vec3(-0.01,0,0));
+        //_camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
         _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
         _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
         node->addChild(_camera);
@@ -106,9 +106,9 @@ TerrainVR::TerrainVR()
         _camera2->setCameraFlag(CameraFlag::USER2);
         //camera2->setPosition3D(Vec3(-0.9,1.6f,4));
 
-        _camera2->setPosition3D(Vec3(0.01,0,0));
+        //_camera2->setPosition3D(Vec3(0.01,0,0));
         
-        _camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+        //_camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
         _camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
         _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
         node->addChild(_camera2);
@@ -121,16 +121,39 @@ TerrainVR::TerrainVR()
     
     addChild(node);
     
+    _objectNode = Node::create();
+    
     auto player = Sprite3D::create("Sprite3DTest/girl.c3b");
     player->setCameraMask(2);
     player->setScale(0.008f);
+    
+    {
+        auto player2 = Sprite3D::create("Sprite3DTest/girl.c3b");
+        player2->setCameraMask(2);
+        player2->setScale(0.008f);
+        player2->setPositionX(0.5f);
+        _objectNode->addChild(player2);
+        
+        auto player3 = Sprite3D::create("Sprite3DTest/girl.c3b");
+        player3->setCameraMask(2);
+        player3->setScale(0.008f);
+        player3->setPositionY(0.5f);
+        _objectNode->addChild(player3);
+        
+        auto player4 = Sprite3D::create("Sprite3DTest/girl.c3b");
+        player4->setCameraMask(2);
+        player4->setScale(0.008f);
+        player4->setPositionZ(0.5f);
+        _objectNode->addChild(player4);
+    }
 //    auto moveBy = MoveBy::create(2.0, Vec3(6, 0, 2));
-    auto pos = player->getPosition3D();
-    player->setPosition3D(pos + Vec3(-4,1,0));
+    auto pos = _objectNode->getPosition3D();
+    _objectNode->setPosition3D(pos + Vec3(-3,1,0));
 //    player->runAction(
 //                      RepeatForever::create(Sequence::createWithTwoActions(moveBy, moveBy->reverse()))
 //    );
-    addChild(player);
+    addChild(_objectNode);
+    _objectNode->addChild(player);
     player->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
     
     Terrain::DetailMap r("TerrainTest/dirt.jpg"),g("TerrainTest/Grass2.jpg"),b("TerrainTest/road.jpg"),a("TerrainTest/GreenSkin.jpg");
@@ -151,34 +174,62 @@ TerrainVR::TerrainVR()
     
     this->addChild(rootps, 0, 0);
     
-    {
-        Device::setAccelerometerEnabled(true);
-        auto listener = EventListenerAcceleration::create([this](Acceleration* acc, Event* event){
-            CCLOG("receive Acceleration Event %f %f %f %f", acc->timestamp, acc->x, acc->y, acc->z);
-            //const float step = 0.3f;
-            //Vec3 r = _headNode->getRotation3D();
-            //r.x += step * touches->getDelta().y;
-            //r.y += step * touches->getDelta().x;
-            //Vec3 r()
-            //_headNode->setRotation3D(r);
+}
+
+void TerrainVR::onEnter()
+{
+    TerrainTestDemo::onEnter();
+    Device::setGyroscopeEnabled(true);
+    auto listener = EventListenerGyroscope::create(
+        [=](Gyroscope* val, Event* evt)
+        {
+            float axisX = val->x;
+            float axisY = val->y;
+            float axisZ = val->z;
+            float dT = val->deltaTime / 1e9;
             
-        });
-        _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-    }
-    
+            float gyroscopeRotationVelocity = sqrtf(axisX * axisX + axisY * axisY + axisZ * axisZ);
+            if (gyroscopeRotationVelocity > MATH_EPSILON)
+            {
+                axisX /= gyroscopeRotationVelocity;
+                axisY /= gyroscopeRotationVelocity;
+                axisZ /= gyroscopeRotationVelocity;
+            }
+            
+            float thetaOverTwo = -gyroscopeRotationVelocity * dT / 2.0f;
+            float sinThetaOverTwo = sin(thetaOverTwo);
+            float cosThetaOverTwo = cos(thetaOverTwo);
+            Quaternion deltaQuaternion;
+            deltaQuaternion.x = ((float) (sinThetaOverTwo * axisX));
+            deltaQuaternion.y = ((float) (sinThetaOverTwo * axisY));
+            deltaQuaternion.z = ((float) (sinThetaOverTwo * axisZ));
+            deltaQuaternion.w = ((float) - cosThetaOverTwo);
+            
+            auto rot = _headNode->getRotationQuat();
+            rot =  rot * deltaQuaternion;
+            _headNode->setRotationQuat(rot);
+        }
+                                                   );
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+}
+
+void TerrainVR::onExit()
+{
+    TerrainTestDemo::onExit();
+    Device::setGyroscopeEnabled(false);
 }
 
 void TerrainVR::onToucheMoved(const cocos2d::Touch *touches, cocos2d::Event *event)
 {
-    const float step = 0.3f;
-    //Quaternion q(Vec3(0,1,0),step * touches->getDelta().x);
-    //Quaternion q2(Vec3(1,0,0),step * touches->getDelta().y);
-    //q =  q2 * q * _headNode->getRotationQuat();
-    //_headNode->setRotationQuat(q);
-    Vec3 r = _headNode->getRotation3D();
-    r.x += step * touches->getDelta().y;
-    r.y += step * touches->getDelta().x;
-    _headNode->setRotation3D(r);
+//    const float step = 0.3f;
+//    //Quaternion q(Vec3(0,1,0),step * touches->getDelta().x);
+//    //Quaternion q2(Vec3(1,0,0),step * touches->getDelta().y);
+//    //q =  q2 * q * _headNode->getRotationQuat();
+//    //_headNode->setRotationQuat(q);
+//    Vec3 r = _headNode->getRotation3D();
+//    r.x += step * touches->getDelta().y;
+//    r.y += step * touches->getDelta().x;
+//    _headNode->setRotation3D(r);
 
     CCLOG("touched moved.");
 }

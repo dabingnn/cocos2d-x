@@ -36,10 +36,14 @@ public:
     virtual std::string title() const override;
     virtual std::string subtitle() const override;
     cocos2d::Terrain* _terrain;
+public:
+    virtual void onEnter() override;
+    virtual void onExit() override;
 protected:
     cocos2d::Camera* _camera;
     cocos2d::Camera* _camera2;
     cocos2d::Node* _headNode;
+    cocos2d::Node* _objectNode;
     void onToucheMoved(const cocos2d::Touch* touches, cocos2d::Event* event);
     bool onTouchesBegan(const cocos2d::Touch* touches, cocos2d::Event* event);
 };
