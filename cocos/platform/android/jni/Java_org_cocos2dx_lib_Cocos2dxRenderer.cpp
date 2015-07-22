@@ -51,4 +51,13 @@ extern "C" {
         std::string pszText = cocos2d::IMEDispatcher::sharedDispatcher()->getContentText();
         return env->NewStringUTF(pszText.c_str());
     }
+
+    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeSetHeadTransform(JNIEnv * env, jobject thiz, jfloatArray transform) {
+        int size = env->GetArrayLength(transform);
+        jfloat data[size];
+
+        env->GetFloatArrayRegion(transform, 0, size, data);
+
+        cocos2d::Director::getInstance()->setHeadTransform(data);
+    }
 }

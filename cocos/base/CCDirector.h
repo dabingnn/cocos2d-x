@@ -146,6 +146,7 @@ public:
     virtual ~Director();
     virtual bool init();
 
+    void setHeadTransform(const float* transform);
     // attribute
 
     /** Gets current running Scene. Director can only run one Scene at a time. */

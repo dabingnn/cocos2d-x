@@ -23,17 +23,20 @@ THE SOFTWARE.
  ****************************************************************************/
 package org.cocos2dx.lib;
 
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
+import android.util.Log;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+import com.google.vrtoolkit.cardboard.sensors.HeadTracker;
 
-import android.opengl.GLSurfaceView;
-
-import org.cocos2dx.lib.Cocos2dxHelper;
 public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     // ===========================================================
     // Constants
     // ===========================================================
-
+    private HeadTracker headTracker;
+    private float[] headTransform = new float[16];
     private final static long NANOSECONDSPERSECOND = 1000000000L;
     private final static long NANOSECONDSPERMICROSECOND = 1000000;
 
@@ -74,6 +77,8 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
         Cocos2dxRenderer.nativeInit(this.mScreenWidth, this.mScreenHeight);
         this.mLastTickInNanoSeconds = System.nanoTime();
         mNativeInitCompleted = true;
+        headTracker = HeadTracker.createFromContext(Cocos2dxActivity.getContext());
+        headTracker.startTracking();
     }
 
     @Override
@@ -87,6 +92,8 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
          * No need to use algorithm in default(60 FPS) situation,
          * since onDrawFrame() was called by system 60 times per second by default.
          */
+        this.headTracker.getLastHeadView(headTransform, 0);
+        nativeSetHeadTransform(headTransform);
         if (sAnimationInterval <= 1.0 / 60 * Cocos2dxRenderer.NANOSECONDSPERSECOND) {
             Cocos2dxRenderer.nativeRender();
         } else {
@@ -168,6 +175,7 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     private static native void nativeInsertText(final String text);
     private static native void nativeDeleteBackward();
     private static native String nativeGetContentText();
+    private static native void nativeSetHeadTransform(final float[] transform);
 
     public void handleInsertText(final String text) {
         Cocos2dxRenderer.nativeInsertText(text);
