@@ -3,6 +3,7 @@
 #include "base/CCEventType.h"
 #include "base/CCEventCustom.h"
 #include "base/CCEventDispatcher.h"
+#include "math/CCMath.h"
 #include "../CCApplication.h"
 #include "platform/CCFileUtils.h"
 #include "JniHelper.h"
@@ -55,7 +56,8 @@ extern "C" {
     JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxRenderer_nativeSetHeadTransform(JNIEnv * env, jobject thiz, jfloatArray transform) {
         int size = env->GetArrayLength(transform);
         jfloat data[size];
-
+        Mat4 matrix(data);
+        matrix.transpose();
         env->GetFloatArrayRegion(transform, 0, size, data);
 
         cocos2d::Director::getInstance()->setHeadTransform(data);

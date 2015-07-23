@@ -39,6 +39,7 @@ public:
 public:
     virtual void onEnter() override;
     virtual void onExit() override;
+    virtual void update(float delta) override;
 protected:
     cocos2d::Camera* _camera;
     cocos2d::Camera* _camera2;

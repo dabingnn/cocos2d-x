@@ -146,7 +146,8 @@ public:
     virtual ~Director();
     virtual bool init();
 
-    void setHeadTransform(const float* transform);
+    void setHeadTransform(const Mat4& transform) { _headTransform = transform; }
+    const Mat4& getHeadTransform() const { return _headTransform; }
     // attribute
 
     /** Gets current running Scene. Director can only run one Scene at a time. */
@@ -610,6 +611,8 @@ protected:
     
     /* Console for the director */
     Console *_console;
+    /*transform to track the head moving in VR*/
+    Mat4 _headTransform;
 
     bool _isStatusLabelUpdated;
 

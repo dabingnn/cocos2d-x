@@ -75,6 +75,14 @@ void TerrainSimple::onTouchesMoved(const std::vector<cocos2d::Touch*>& touches, 
     _camera->setPosition3D(cameraPos);   
 }
 
+void TerrainVR::update(float delta)
+{
+    Mat4 transform = Director::getInstance()->getHeadTransform();
+    Quaternion q;
+    transform.getRotation(&q);
+    q.inverse();
+    _headNode->setRotationQuat(q);
+}
 
 TerrainVR::TerrainVR()
 {
@@ -83,6 +91,7 @@ TerrainVR::TerrainVR()
     auto node = Node::create();
     _headNode = node;
     node->setPosition3D(Vec3(-1,1.6f,4));
+    scheduleUpdate();
     
 //    {
 //        auto moveBy = MoveBy::create(2.0, Vec3(2, 0, 2));
@@ -179,44 +188,44 @@ TerrainVR::TerrainVR()
 void TerrainVR::onEnter()
 {
     TerrainTestDemo::onEnter();
-    Device::setGyroscopeEnabled(true);
-    auto listener = EventListenerGyroscope::create(
-        [=](Gyroscope* val, Event* evt)
-        {
-            float axisX = val->x;
-            float axisY = val->y;
-            float axisZ = val->z;
-            float dT = val->deltaTime / 1e9;
-            
-            float gyroscopeRotationVelocity = sqrtf(axisX * axisX + axisY * axisY + axisZ * axisZ);
-            if (gyroscopeRotationVelocity > MATH_EPSILON)
-            {
-                axisX /= gyroscopeRotationVelocity;
-                axisY /= gyroscopeRotationVelocity;
-                axisZ /= gyroscopeRotationVelocity;
-            }
-            
-            float thetaOverTwo = -gyroscopeRotationVelocity * dT / 2.0f;
-            float sinThetaOverTwo = sin(thetaOverTwo);
-            float cosThetaOverTwo = cos(thetaOverTwo);
-            Quaternion deltaQuaternion;
-            deltaQuaternion.x = ((float) (sinThetaOverTwo * axisX));
-            deltaQuaternion.y = ((float) (sinThetaOverTwo * axisY));
-            deltaQuaternion.z = ((float) (sinThetaOverTwo * axisZ));
-            deltaQuaternion.w = ((float) - cosThetaOverTwo);
-            
-            auto rot = _headNode->getRotationQuat();
-            rot =  rot * deltaQuaternion;
-            _headNode->setRotationQuat(rot);
-        }
-                                                   );
-    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+//    Device::setGyroscopeEnabled(true);
+//    auto listener = EventListenerGyroscope::create(
+//        [=](Gyroscope* val, Event* evt)
+//        {
+//            float axisX = val->x;
+//            float axisY = val->y;
+//            float axisZ = val->z;
+//            float dT = val->deltaTime / 1e9;
+//            
+//            float gyroscopeRotationVelocity = sqrtf(axisX * axisX + axisY * axisY + axisZ * axisZ);
+//            if (gyroscopeRotationVelocity > MATH_EPSILON)
+//            {
+//                axisX /= gyroscopeRotationVelocity;
+//                axisY /= gyroscopeRotationVelocity;
+//                axisZ /= gyroscopeRotationVelocity;
+//            }
+//            
+//            float thetaOverTwo = -gyroscopeRotationVelocity * dT / 2.0f;
+//            float sinThetaOverTwo = sin(thetaOverTwo);
+//            float cosThetaOverTwo = cos(thetaOverTwo);
+//            Quaternion deltaQuaternion;
+//            deltaQuaternion.x = ((float) (sinThetaOverTwo * axisX));
+//            deltaQuaternion.y = ((float) (sinThetaOverTwo * axisY));
+//            deltaQuaternion.z = ((float) (sinThetaOverTwo * axisZ));
+//            deltaQuaternion.w = ((float) - cosThetaOverTwo);
+//            
+//            auto rot = _headNode->getRotationQuat();
+//            rot =  rot * deltaQuaternion;
+//            _headNode->setRotationQuat(rot);
+//        }
+//                                                   );
+//    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 }
 
 void TerrainVR::onExit()
 {
     TerrainTestDemo::onExit();
-    Device::setGyroscopeEnabled(false);
+    //Device::setGyroscopeEnabled(false);
 }
 
 void TerrainVR::onToucheMoved(const cocos2d::Touch *touches, cocos2d::Event *event)
