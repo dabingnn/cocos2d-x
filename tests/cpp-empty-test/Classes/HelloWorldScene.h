@@ -17,7 +17,10 @@ public:
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
-    
+protected:
+    virtual bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *evt) override;
+    virtual void onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *evt) override;
+    virtual void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *evt) override;
 protected:
     void initScene();
 private:
@@ -26,6 +29,7 @@ private:
     cocos2d::Camera* _camera2;
     cocos2d::Node* _headNode;
     cocos2d::Node* _objectNode;
+    bool _isMoving;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

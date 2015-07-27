@@ -148,12 +148,26 @@ bool HelloWorld::init()
 //    
 //    this->addChild(rootps, 0, 0);
 //}
+bool HelloWorld::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *evt)
+{
+    _isMoving = true;
+    return true;
+}
+
+void HelloWorld::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *evt)
+{
+}
+
+void HelloWorld::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *evt)
+{
+    _isMoving = false;
+}
 
 void HelloWorld::initScene()
 {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     auto vp = Camera::getDefaultViewport();
-    auto node = CSLoader::createNode("res/Scene3D.csb");
+    auto node = CSLoader::createNode("res/Scene3DNoParticle.csb");
     node->setCameraMask((unsigned short)CameraFlag::USER1, true);
     addChild(node);
     _headNode = node->getChildByTag(57);
@@ -174,6 +188,11 @@ void HelloWorld::initScene()
         _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
         _headNode->addChild(_camera2);
     }
+
+    auto listener = EventListenerTouchOneByOne::create();
+    listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+    listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
+    _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
     CCASSERT(_headNode, "");
 }
 
@@ -185,6 +204,21 @@ void HelloWorld::update(float delta)
     q.inverse();
     CCLOG("head rotation is %lf, %lf, %lf, %lf", q.x, q.y,q.z,q.w);
     _headNode->setRotationQuat(q);
+    //add moving logic
+    if(_isMoving)
+    {
+        Mat4 headTM;
+        Mat4::createRotation(q, &headTM);
+        Vec3 toward;
+        headTM.transformVector(0, 0, -1, 0, &toward);
+        toward.y = 0;
+        toward.normalize();
+        const float MOVE_SPEED = 2.0;
+        Vec3 pos = _headNode->getPosition3D();
+        pos += toward * MOVE_SPEED;
+        _headNode->setPosition3D(pos);
+        
+    }
 }
 
 void HelloWorld::menuCloseCallback(Ref* sender)
