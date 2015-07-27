@@ -899,6 +899,10 @@
 		A5030C3619D059DA000E78E7 /* OpenURLTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A5030C3319D059DA000E78E7 /* OpenURLTest.cpp */; };
 		B2507B6B192589AF00FA4972 /* Shaders3D in Resources */ = {isa = PBXBuildFile; fileRef = B2507B6A192589AF00FA4972 /* Shaders3D */; };
 		B2507B6C192589AF00FA4972 /* Shaders3D in Resources */ = {isa = PBXBuildFile; fileRef = B2507B6A192589AF00FA4972 /* Shaders3D */; };
+		B284C8C61B608D800093B7AD /* vr in Resources */ = {isa = PBXBuildFile; fileRef = B284C8C51B608D800093B7AD /* vr */; };
+		B284C8C71B608D800093B7AD /* vr in Resources */ = {isa = PBXBuildFile; fileRef = B284C8C51B608D800093B7AD /* vr */; };
+		B284C8C91B60EB9C0093B7AD /* res in Resources */ = {isa = PBXBuildFile; fileRef = B284C8C81B60EB9C0093B7AD /* res */; };
+		B284C8CA1B60EB9C0093B7AD /* res in Resources */ = {isa = PBXBuildFile; fileRef = B284C8C81B60EB9C0093B7AD /* res */; };
 		B5CE6DD11B3C08F8002B0419 /* UIRadioButtonTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5CE6DCD1B3C08F8002B0419 /* UIRadioButtonTest.cpp */; };
 		B5CE6DD21B3C08F8002B0419 /* UIRadioButtonTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B5CE6DCD1B3C08F8002B0419 /* UIRadioButtonTest.cpp */; };
 		B603F1AF1AC8EA4E00A9579C /* TerrainTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B603F1AD1AC8EA4E00A9579C /* TerrainTest.cpp */; };
@@ -1956,6 +1960,8 @@
 		A5030C3319D059DA000E78E7 /* OpenURLTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenURLTest.cpp; path = OpenURLTest/OpenURLTest.cpp; sourceTree = "<group>"; };
 		A5030C3419D059DA000E78E7 /* OpenURLTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OpenURLTest.h; path = OpenURLTest/OpenURLTest.h; sourceTree = "<group>"; };
 		B2507B6A192589AF00FA4972 /* Shaders3D */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Shaders3D; path = "../tests/cpp-tests/Resources/Shaders3D"; sourceTree = "<group>"; };
+		B284C8C51B608D800093B7AD /* vr */ = {isa = PBXFileReference; lastKnownFileType = folder; name = vr; path = "../tests/cpp-empty-test/Resources/vr"; sourceTree = "<group>"; };
+		B284C8C81B60EB9C0093B7AD /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; name = res; path = "../tests/cpp-empty-test/Resources/res"; sourceTree = "<group>"; };
 		B5CE6DCD1B3C08F8002B0419 /* UIRadioButtonTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIRadioButtonTest.cpp; sourceTree = "<group>"; };
 		B5CE6DCE1B3C08F8002B0419 /* UIRadioButtonTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIRadioButtonTest.h; sourceTree = "<group>"; };
 		B603F1AD1AC8EA4E00A9579C /* TerrainTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TerrainTest.cpp; path = TerrainTest/TerrainTest.cpp; sourceTree = "<group>"; };
@@ -2502,6 +2508,8 @@
 		1AC358FD18CEC1EF00F37B72 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				B284C8C81B60EB9C0093B7AD /* res */,
+				B284C8C51B608D800093B7AD /* vr */,
 				1AC358FE18CEC1FB00F37B72 /* bang.png */,
 				1AC358FF18CEC1FB00F37B72 /* fonts */,
 				1AC3590018CEC1FB00F37B72 /* ipad */,
@@ -4826,11 +4834,13 @@
 				1AC3590918CEC1FB00F37B72 /* ipadhd in Resources */,
 				1AC358F518CEC1D400F37B72 /* InfoPlist.strings in Resources */,
 				1AC3590318CEC1FB00F37B72 /* bang.png in Resources */,
+				B284C8C91B60EB9C0093B7AD /* res in Resources */,
 				1AC3590718CEC1FB00F37B72 /* ipad in Resources */,
 				1AC3590B18CEC1FB00F37B72 /* iphone in Resources */,
 				1AC358F818CEC1D400F37B72 /* Icon.icns in Resources */,
 				1AC3590518CEC1FB00F37B72 /* fonts in Resources */,
 				1AC358F618CEC1D400F37B72 /* MainMenu.xib in Resources */,
+				B284C8C61B608D800093B7AD /* vr in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4860,6 +4870,7 @@
 				1AC358E418CEC1CB00F37B72 /* Icon-40.png in Resources */,
 				1AC358E618CEC1CB00F37B72 /* Icon-58.png in Resources */,
 				527B1F3019EF9819000A1F82 /* Default-667h@2x.png in Resources */,
+				B284C8C71B608D800093B7AD /* vr in Resources */,
 				1AC358DB18CEC1CB00F37B72 /* Default-568h@2x.png in Resources */,
 				1AC358DF18CEC1CB00F37B72 /* Icon-100.png in Resources */,
 				1AC358E218CEC1CB00F37B72 /* Icon-144.png in Resources */,
@@ -4871,6 +4882,7 @@
 				1AC358E518CEC1CB00F37B72 /* Icon-57.png in Resources */,
 				1AC358DC18CEC1CB00F37B72 /* Default.png in Resources */,
 				527B1F3119EF9819000A1F82 /* Default-736h@3x.png in Resources */,
+				B284C8CA1B60EB9C0093B7AD /* res in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

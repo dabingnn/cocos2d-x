@@ -17,6 +17,9 @@ public:
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
+    
+protected:
+    void initScene();
 private:
     cocos2d::Terrain* _terrain;
     cocos2d::Camera* _camera;

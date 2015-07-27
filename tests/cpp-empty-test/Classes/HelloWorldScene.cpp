@@ -1,6 +1,7 @@
 #include "HelloWorldScene.h"
 #include "AppMacros.h"
 #include "extensions/cocos-ext.h"
+#include "editor-support/cocostudio/CocoStudio.h"
 
 USING_NS_CC;
 
@@ -74,75 +75,106 @@ bool HelloWorld::init()
 //    // add the sprite as a child to this layer
 //    this->addChild(sprite);
     
-    {
-        Size visibleSize = Director::getInstance()->getVisibleSize();
-        auto vp = Camera::getDefaultViewport();
-        auto node = Node::create();
-        _headNode = node;
-        node->setPosition3D(Vec3(-1,1.6f,4));
-        scheduleUpdate();
-        
-        //use custom camera
-        {
-            _camera = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
-            _camera->setCameraFlag(CameraFlag::USER1);
-            
-            _camera->setPosition3D(Vec3(-0.01,0,0));
-            //_camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
-            _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
-            _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
-            node->addChild(_camera);
-            
-            _camera2 = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
-            _camera2->setCameraFlag(CameraFlag::USER2);
-            
-            _camera2->setPosition3D(Vec3(0.01,0,0));
-            
-            //_camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
-            _camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
-            _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
-            node->addChild(_camera2);
-        }
-        
-        addChild(node);
-        
-        _objectNode = Node::create();
-        
-        auto player = Sprite3D::create("vr/girl.c3b");
-        player->setCameraMask(2);
-        player->setScale(0.008f);
-        
-        //    auto moveBy = MoveBy::create(2.0, Vec3(6, 0, 2));
-        auto pos = _objectNode->getPosition3D();
-        _objectNode->setPosition3D(pos + Vec3(-3,1,0));
-        //    player->runAction(
-        //                      RepeatForever::create(Sequence::createWithTwoActions(moveBy, moveBy->reverse()))
-        //    );
-        addChild(_objectNode);
-        _objectNode->addChild(player);
-        player->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
-        
-        Terrain::DetailMap r("vr/dirt.jpg"),g("vr/Grass2.jpg"),b("vr/road.jpg"),a("vr/GreenSkin.jpg");
-        
-        Terrain::TerrainData data("vr/heightmap16.jpg","vr/alphamap.png",r,g,b,a);
-        
-        _terrain = Terrain::create(data,Terrain::CrackFixedType::SKIRT);
-        _terrain->setLODDistance(3.2f,6.4f,9.6f);
-        _terrain->setMaxDetailMapAmount(4);
-        addChild(_terrain);
-        _terrain->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
-        _terrain->setDrawWire(false);
-        
-        // add Particle3D for test blend
-        auto rootps = PUParticleSystem3D::create("vr/Particle3D/scripts/mp_torch.pu");
-        rootps->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
-        rootps->startParticleSystem();
-        
-        this->addChild(rootps, 0, 0);
-        scheduleUpdate();
-    }
+    initScene();
+    scheduleUpdate();
     
     return true;
+}
+
+//void HelloWorld::initScene()
+//{
+//    Size visibleSize = Director::getInstance()->getVisibleSize();
+//    auto vp = Camera::getDefaultViewport();
+//    auto node = Node::create();
+//    _headNode = node;
+//    node->setPosition3D(Vec3(-1,1.6f,4));
+//    scheduleUpdate();
+//    
+//    //use custom camera
+//    {
+//        _camera = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+//        _camera->setCameraFlag(CameraFlag::USER1);
+//        
+//        _camera->setPosition3D(Vec3(-0.01,0,0));
+//        //_camera->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+//        _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+//        _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
+//        node->addChild(_camera);
+//        
+//        _camera2 = Camera::createPerspective(80,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+//        _camera2->setCameraFlag(CameraFlag::USER2);
+//        
+//        _camera2->setPosition3D(Vec3(0.01,0,0));
+//        
+//        //_camera2->setViewport(experimental::Viewport(0,0,visibleSize.width/2, visibleSize.height));
+//        _camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+//        _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
+//        node->addChild(_camera2);
+//    }
+//    
+//    addChild(node);
+//    
+//    _objectNode = Node::create();
+//    
+//    auto player = Sprite3D::create("vr/girl.c3b");
+//    player->setCameraMask(2);
+//    player->setScale(0.008f);
+//    
+//    //    auto moveBy = MoveBy::create(2.0, Vec3(6, 0, 2));
+//    auto pos = _objectNode->getPosition3D();
+//    _objectNode->setPosition3D(pos + Vec3(-3,1,0));
+//    //    player->runAction(
+//    //                      RepeatForever::create(Sequence::createWithTwoActions(moveBy, moveBy->reverse()))
+//    //    );
+//    addChild(_objectNode);
+//    _objectNode->addChild(player);
+//    player->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
+//    
+//    Terrain::DetailMap r("vr/dirt.jpg"),g("vr/Grass2.jpg"),b("vr/road.jpg"),a("vr/GreenSkin.jpg");
+//    
+//    Terrain::TerrainData data("vr/heightmap16.jpg","vr/alphamap.png",r,g,b,a);
+//    
+//    _terrain = Terrain::create(data,Terrain::CrackFixedType::SKIRT);
+//    _terrain->setLODDistance(3.2f,6.4f,9.6f);
+//    _terrain->setMaxDetailMapAmount(4);
+//    addChild(_terrain);
+//    _terrain->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
+//    _terrain->setDrawWire(false);
+//    
+//    // add Particle3D for test blend
+//    auto rootps = PUParticleSystem3D::create("vr/Particle3D/scripts/mp_torch.pu");
+//    rootps->setCameraMask((unsigned short)CameraFlag::USER1|(unsigned short)CameraFlag::USER2);
+//    rootps->startParticleSystem();
+//    
+//    this->addChild(rootps, 0, 0);
+//}
+
+void HelloWorld::initScene()
+{
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    auto vp = Camera::getDefaultViewport();
+    auto node = CSLoader::createNode("res/Scene3D.csb");
+    node->setCameraMask((unsigned short)CameraFlag::USER1, true);
+    addChild(node);
+    _headNode = node->getChildByTag(57);
+    {
+        _camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+        _camera->setCameraFlag(CameraFlag::USER1);
+        //
+        //        _camera->setPosition3D(Vec3(-0.01,0,0));
+        _camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+        _camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
+        _headNode->addChild(_camera);
+        
+        _camera2 = Camera::createPerspective(60,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+        _camera2->setCameraFlag(CameraFlag::USER1);
+        //
+        //        _camera->setPosition3D(Vec3(-0.01,0,0));
+        _camera2->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+        _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
+        _headNode->addChild(_camera2);
+    }
+    CCASSERT(_headNode, "");
 }
 
 void HelloWorld::update(float delta)
@@ -151,6 +183,7 @@ void HelloWorld::update(float delta)
     Quaternion q;
     transform.getRotation(&q);
     q.inverse();
+    CCLOG("head rotation is %lf, %lf, %lf, %lf", q.x, q.y,q.z,q.w);
     _headNode->setRotationQuat(q);
 }
 

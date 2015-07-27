@@ -71,6 +71,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
     
     // set searching path
     FileUtils::getInstance()->setSearchPaths(searchPath);
+    FileUtils::getInstance()->addSearchPath("res");
 	
     // turn on display FPS
     director->setDisplayStats(true);
