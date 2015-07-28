@@ -188,7 +188,19 @@ void HelloWorld::initScene()
         _camera2->setViewport(experimental::Viewport(vp._left + vp._width/2,vp._bottom, vp._width/2, vp._height));
         _headNode->addChild(_camera2);
     }
-
+    
+    //add skybox
+    {
+        auto textureCube = TextureCube::create("skybox/left.jpg", "skybox/right.jpg",
+                                           "skybox/top.jpg", "skybox/bottom.jpg",
+                                           "skybox/front.jpg", "skybox/back.jpg");
+        auto skyBox = Skybox::create();
+        skyBox->retain();
+        
+        skyBox->setTexture(textureCube);
+        addChild(skyBox);
+        skyBox->setCameraMask((unsigned short)CameraFlag::USER1);
+    }
     auto listener = EventListenerTouchOneByOne::create();
     listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
     listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
