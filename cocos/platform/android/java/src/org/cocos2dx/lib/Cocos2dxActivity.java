@@ -30,6 +30,16 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import org.cocos2dx.lib.Cocos2dxHelper.Cocos2dxHelperListener;
 import com.chukong.cocosplay.client.CocosPlayClient;
 
+import com.google.atap.tangoservice.Tango;
+import com.google.atap.tangoservice.Tango.OnTangoUpdateListener;
+import com.google.atap.tangoservice.TangoConfig;
+import com.google.atap.tangoservice.TangoCoordinateFramePair;
+import com.google.atap.tangoservice.TangoErrorException;
+import com.google.atap.tangoservice.TangoEvent;
+import com.google.atap.tangoservice.TangoOutOfDateException;
+import com.google.atap.tangoservice.TangoPoseData;
+import com.google.atap.tangoservice.TangoXyzIjData;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -45,6 +55,8 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.opengl.GLSurfaceView;
+
+import java.util.ArrayList;
 
 public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelperListener {
     // ===========================================================
@@ -63,6 +75,9 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     private static Cocos2dxActivity sContext = null;
     private Cocos2dxVideoHelper mVideoHelper = null;
     private Cocos2dxWebViewHelper mWebViewHelper = null;
+    private Tango tango;
+    private TangoConfig tangoConfig;
+    private boolean tangoServiceConnected = false;
 
     public class Cocos2dxEGLConfigChooser implements GLSurfaceView.EGLConfigChooser
     {
@@ -228,7 +243,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         
         this.mGLContextAttrs = getGLContextAttrs();
         this.init();
-
+        this.initTango();
         if (mVideoHelper == null) {
             mVideoHelper = new Cocos2dxVideoHelper(this, mFrameLayout);
         }
@@ -255,6 +270,12 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
         Cocos2dxHelper.onResume();
         this.mGLSurfaceView.onResume();
+        if(!tangoServiceConnected)
+        {
+            startActivityForResult(
+                    Tango.getRequestPermissionIntent(Tango.PERMISSIONTYPE_MOTION_TRACKING),
+                    Tango.TANGO_INTENT_ACTIVITYCODE);
+        }
     }
 
     @Override
@@ -263,8 +284,52 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         
         Cocos2dxHelper.onPause();
         this.mGLSurfaceView.onPause();
+        if(tangoServiceConnected)
+        {
+            tango.disconnect();
+            tangoServiceConnected = false;
+        }
     }
-    
+
+    protected void setTangoCallbacks()
+    {
+        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        class tangoListener implements Tango.OnTangoUpdateListener
+        {
+            @Override
+            public void onPoseAvailable(TangoPoseData pose)
+            {
+                final String translationMsg = String.format("Translation: %f, %f, %f",
+                        pose.translation[0], pose.translation[1],
+                        pose.translation[2]);
+
+                Log.i(String.valueOf(getApplicationContext()),translationMsg);
+
+            }
+            @Override
+            public void onXyzIjAvailable(TangoXyzIjData data)
+            {
+
+            }
+            @Override
+            public void onFrameAvailable(int frame)
+            {
+
+            }
+            @Override
+            public void onTangoEvent(TangoEvent evt)
+            {
+
+            }
+        }
+
+        tango.connectListener(framePairs, new tangoListener());
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -297,7 +362,23 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         for (OnActivityResultListener listener : Cocos2dxHelper.getOnActivityResultListeners()) {
             listener.onActivityResult(requestCode, resultCode, data);
         }
-
+        if (requestCode == Tango.TANGO_INTENT_ACTIVITYCODE)
+        {
+            if(resultCode !=RESULT_CANCELED)
+            {
+                setTangoCallbacks();
+                try
+                {
+                    tango.connect(tangoConfig);
+                    tangoServiceConnected = true;
+                }
+                catch (TangoOutOfDateException e)
+                {
+                    tangoServiceConnected = false;
+                    Log.i(String.valueOf(getApplicationContext()),"Tango service error");
+                }
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -341,7 +422,13 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         // Set framelayout as the content view
         setContentView(mFrameLayout);
     }
-    
+
+    private void initTango()
+    {
+        tango = new Tango(this);
+        tangoConfig = tango.getConfig(TangoConfig.CONFIG_TYPE_CURRENT);
+        tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_MOTIONTRACKING, true);
+    }
     public Cocos2dxGLSurfaceView onCreateView() {
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         //this line is need on some device if we specify an alpha bits
