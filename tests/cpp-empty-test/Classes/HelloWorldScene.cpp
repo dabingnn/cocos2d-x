@@ -214,7 +214,7 @@ void HelloWorld::update(float delta)
     Quaternion q;
     transform.getRotation(&q);
     q.inverse();
-    CCLOG("head rotation is %lf, %lf, %lf, %lf", q.x, q.y,q.z,q.w);
+    //CCLOG("head rotation is %lf, %lf, %lf, %lf", q.x, q.y,q.z,q.w);
     _headNode->setRotationQuat(q);
     //add moving logic
     if(_isMoving)
