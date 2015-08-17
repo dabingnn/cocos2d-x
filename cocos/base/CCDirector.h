@@ -148,6 +148,9 @@ public:
 
     void setHeadTransform(const Mat4& transform) { _headTransform = transform; }
     const Mat4& getHeadTransform() const { return _headTransform; }
+
+    void setDeviceMove(const Vec3& v) { _deviceMove = v; }
+    const Vec3& getDeviceMove() const { return _deviceMove; }
     // attribute
 
     /** Gets current running Scene. Director can only run one Scene at a time. */
@@ -613,6 +616,7 @@ protected:
     Console *_console;
     /*transform to track the head moving in VR*/
     Mat4 _headTransform;
+    Vec3 _deviceMove;
 
     bool _isStatusLabelUpdated;
 

@@ -138,7 +138,16 @@ public class Cocos2dxGLSurfaceView extends GLSurfaceView {
         }
         });
     }
-    
+
+    public static void queueDeviceMove(final float x, final float y, final float z) {
+        mCocos2dxGLSurfaceView.queueEvent(new Runnable() {
+            @Override
+            public void run() {
+                Cocos2dxAccelerometer.onDeviceMoved(x,y,z);
+            }
+        });
+    }
+
     public void setCocos2dxRenderer(final Cocos2dxRenderer renderer) {
         this.mCocos2dxRenderer = renderer;
         this.setRenderer(this.mCocos2dxRenderer);

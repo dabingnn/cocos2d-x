@@ -166,6 +166,7 @@ bool Director::init(void)
     initTextureCache();
     initMatrixStack();
     _headTransform = Mat4::IDENTITY;
+    _deviceMove = Vec3(0,0,0);
     _defaultCamera = Camera::create();
     _defaultCamera->retain();
 

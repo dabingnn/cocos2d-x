@@ -30,4 +30,13 @@ extern "C" {
         EventGyroscope event(a);
         Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
     }
+    
+    JNIEXPORT void JNICALL Java_org_cocos2dx_lib_Cocos2dxAccelerometer_onDeviceMovedNative(JNIEnv*  env, jobject thiz, jfloat x, jfloat y, jfloat z) 
+    {
+        Vec3 v;
+        v.x = x;
+        v.y = y;
+        v.z = z;
+        Director::getInstance()->setDeviceMove(v);
+    }
 }

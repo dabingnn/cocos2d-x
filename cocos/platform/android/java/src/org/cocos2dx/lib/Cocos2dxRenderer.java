@@ -29,14 +29,12 @@ import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
-import com.google.vrtoolkit.cardboard.sensors.HeadTracker;
 
 public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
     // ===========================================================
     // Constants
     // ===========================================================
-    private HeadTracker headTracker;
-    private float[] headTransform = new float[16];
+    private Cocos2dxDeviceTracker deviceTracker = null;
     private final static long NANOSECONDSPERSECOND = 1000000000L;
     private final static long NANOSECONDSPERMICROSECOND = 1000000;
 
@@ -77,8 +75,8 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
         Cocos2dxRenderer.nativeInit(this.mScreenWidth, this.mScreenHeight);
         this.mLastTickInNanoSeconds = System.nanoTime();
         mNativeInitCompleted = true;
-        headTracker = HeadTracker.createFromContext(Cocos2dxActivity.getContext());
-        headTracker.startTracking();
+        deviceTracker = new Cocos2dxDeviceTracker();
+        deviceTracker.startTracking();
     }
 
     @Override
@@ -92,8 +90,11 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
          * No need to use algorithm in default(60 FPS) situation,
          * since onDrawFrame() was called by system 60 times per second by default.
          */
-        this.headTracker.getLastHeadView(headTransform, 0);
-        nativeSetHeadTransform(headTransform);
+        if(null != deviceTracker)
+        {
+            float[] headTransform = deviceTracker.getHeadTracking();
+            nativeSetHeadTransform(headTransform);
+        }
         if (sAnimationInterval <= 1.0 / 60 * Cocos2dxRenderer.NANOSECONDSPERSECOND) {
             Cocos2dxRenderer.nativeRender();
         } else {
@@ -165,11 +166,21 @@ public class Cocos2dxRenderer implements GLSurfaceView.Renderer {
 
         Cocos2dxHelper.onEnterBackground();
         Cocos2dxRenderer.nativeOnPause();
+        if(null != deviceTracker)
+        {
+            deviceTracker.stopTracking();
+        }
+
     }
 
     public void handleOnResume() {
         Cocos2dxHelper.onEnterForeground();
         Cocos2dxRenderer.nativeOnResume();
+
+        if(null != deviceTracker)
+        {
+            deviceTracker.startTracking();
+        }
     }
 
     private static native void nativeInsertText(final String text);

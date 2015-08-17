@@ -91,6 +91,11 @@ public class Cocos2dxHelper {
         ((Cocos2dxActivity)sActivity).runOnGLThread(r);
     }
 
+    public static Cocos2dxAccelerometer getAccelerometer()
+    {
+        return sCocos2dxAccelerometer;
+    }
+
     private static boolean sInited = false;
     public static void init(final Activity activity) {
         if (!sInited) {

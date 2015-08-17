@@ -148,29 +148,54 @@ bool HelloWorld::init()
 //    
 //    this->addChild(rootps, 0, 0);
 //}
+
+static cocos2d::Label* _movementLabel = nullptr;
+static cocos2d::Mat4 _originalHeadRotation = Mat4::IDENTITY;
+static cocos2d::Vec3 _originalTranslation = Vec3::ZERO;
+static float _moveSpeed = 5.0;
+
 bool HelloWorld::onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *evt)
 {
-    _isMoving = true;
+    //_isMoving = true;
     return true;
 }
 
 void HelloWorld::onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *evt)
 {
+    auto delta = touch->getDelta();
+    _moveSpeed += delta.x/10;
+    _moveSpeed = clampf(_moveSpeed, 5, 100);
 }
 
 void HelloWorld::onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *evt)
 {
-    _isMoving = false;
+    //_isMoving = false;
+    //MOVESCALE *= 2;
 }
 
 void HelloWorld::initScene()
 {
     Size visibleSize = Director::getInstance()->getVisibleSize();
     auto vp = Camera::getDefaultViewport();
-    auto node = CSLoader::createNode("res/Scene3DNoParticle.csb");
-    node->setCameraMask((unsigned short)CameraFlag::USER1, true);
-    addChild(node);
-    _headNode = node->getChildByTag(57);
+    auto sceneNode = CSLoader::createNode("res/Scene3DNoParticle.csb");
+    sceneNode->setCameraMask((unsigned short)CameraFlag::USER1, true);
+    addChild(sceneNode);
+    _headNode = sceneNode->getChildByTag(57);
+    
+    {
+        _originalHeadRotation = _headNode->getNodeToParentTransform();
+        _originalHeadRotation.getTranslation(&_originalTranslation);
+        Quaternion q;
+        _originalHeadRotation.getRotation(&q);
+        Mat4::createRotation(q, &_originalHeadRotation);
+        Vec3 forward(0,0,-1);
+        _originalHeadRotation.transformVector(&forward);
+        forward.y = 0;
+        forward.normalize();
+        Mat4::createLookAt(Vec3::ZERO, forward, Vec3(0,1,0), &_originalHeadRotation);
+        
+    }
+    
     {
         _camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
         _camera->setCameraFlag(CameraFlag::USER1);
@@ -201,8 +226,31 @@ void HelloWorld::initScene()
         addChild(skyBox);
         skyBox->setCameraMask((unsigned short)CameraFlag::USER1);
     }
+    
+    //add label
+    {
+        auto label = Label::createWithSystemFont("", "Arial", 8);
+        label->setAnchorPoint(Vec2(0, 1.0));
+        label->setPosition(0, visibleSize.height);
+        //label->setCameraMask((unsigned short)CameraFlag::USER2);
+        _movementLabel = label;
+        addChild(label);
+        
+//        auto camera = Camera::createPerspective(60,visibleSize.width/visibleSize.height * 0.5,0.1f,800);
+//        camera->setCameraFlag(CameraFlag::USER2);
+//        camera->setFrameBufferObject(Director::getInstance()->getDefaultFBO());
+//        camera->setViewport(experimental::Viewport(vp._left,vp._bottom, vp._width/2, vp._height));
+//        _headNode->addChild(camera);
+        
+//        auto node = Node::create();
+//        node->setPosition3D(_headNode->getPosition3D());
+//        node->setRotationQuat(_headNode->getRotationQuat());
+//        sceneNode->addChild(node);
+//        node->addChild(camera);
+    }
     auto listener = EventListenerTouchOneByOne::create();
     listener->onTouchBegan = CC_CALLBACK_2(HelloWorld::onTouchBegan, this);
+    listener->onTouchMoved = CC_CALLBACK_2(HelloWorld::onTouchMoved, this);
     listener->onTouchEnded = CC_CALLBACK_2(HelloWorld::onTouchEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
     CCASSERT(_headNode, "");
@@ -216,21 +264,35 @@ void HelloWorld::update(float delta)
     q.inverse();
     //CCLOG("head rotation is %lf, %lf, %lf, %lf", q.x, q.y,q.z,q.w);
     _headNode->setRotationQuat(q);
-    //add moving logic
-    if(_isMoving)
+    
+    auto v = Director::getInstance()->getDeviceMove();
+    auto v2 = v;
+    _originalHeadRotation.transformVector(v.x, v.y, v.z, 0, &v2);
+    _headNode->setPosition3D(_originalTranslation + v2 * _moveSpeed);
+    v2 = _headNode->getPosition3D();
+    //CCLOG("Device move is %.6f, %.6f, %.6f", v.x, v.y, v.z);
+    if(_movementLabel)
     {
-        Mat4 headTM;
-        Mat4::createRotation(q, &headTM);
-        Vec3 toward;
-        headTM.transformVector(0, 0, -1, 0, &toward);
-        toward.y = 0;
-        toward.normalize();
-        const float MOVE_SPEED = 2.0;
-        Vec3 pos = _headNode->getPosition3D();
-        pos += toward * MOVE_SPEED;
-        _headNode->setPosition3D(pos);
-        
+        auto str = StringUtils::format("Position %.4f, %.4f, %.4f, Speed %.4f", v2.x, v2.y, v2.z, _moveSpeed);
+        _movementLabel->setString(str);
     }
+    //_headNode->setPosition3D(_headNode->getPosition3D() + v * MOVESCALE);
+    
+    //add moving logic
+//    if(_isMoving)
+//    {
+//        Mat4 headTM;
+//        Mat4::createRotation(q, &headTM);
+//        Vec3 toward;
+//        headTM.transformVector(0, 0, -1, 0, &toward);
+//        toward.y = 0;
+//        toward.normalize();
+//        const float MOVE_SPEED = 2.0;
+//        Vec3 pos = _headNode->getPosition3D();
+//        pos += toward * MOVE_SPEED;
+//        _headNode->setPosition3D(pos);
+//        
+//    }
 }
 
 void HelloWorld::menuCloseCallback(Ref* sender)

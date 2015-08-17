@@ -291,45 +291,6 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         }
     }
 
-    protected void setTangoCallbacks()
-    {
-        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
-        framePairs.add(new TangoCoordinateFramePair(
-                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
-                TangoPoseData.COORDINATE_FRAME_DEVICE));
-
-        class tangoListener implements Tango.OnTangoUpdateListener
-        {
-            @Override
-            public void onPoseAvailable(TangoPoseData pose)
-            {
-                final String translationMsg = String.format("Translation: %f, %f, %f",
-                        pose.translation[0], pose.translation[1],
-                        pose.translation[2]);
-
-                Log.i(String.valueOf(getApplicationContext()),translationMsg);
-
-            }
-            @Override
-            public void onXyzIjAvailable(TangoXyzIjData data)
-            {
-
-            }
-            @Override
-            public void onFrameAvailable(int frame)
-            {
-
-            }
-            @Override
-            public void onTangoEvent(TangoEvent evt)
-            {
-
-            }
-        }
-
-        tango.connectListener(framePairs, new tangoListener());
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -382,6 +343,42 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    private void setTangoCallbacks()
+    {
+        ArrayList<TangoCoordinateFramePair> framePairs = new ArrayList<TangoCoordinateFramePair>();
+        framePairs.add(new TangoCoordinateFramePair(
+                TangoPoseData.COORDINATE_FRAME_START_OF_SERVICE,
+                TangoPoseData.COORDINATE_FRAME_DEVICE));
+
+        tango.connectListener(framePairs,
+                new OnTangoUpdateListener() {
+                    @Override
+                    public void onPoseAvailable(TangoPoseData pose)
+                    {
+                        mGLSurfaceView.queueDeviceMove((float)pose.translation[0], (float)pose.translation[1],
+                                (float)pose.translation[2]);
+                    }
+
+                    @Override
+                    public void onXyzIjAvailable(TangoXyzIjData var1)
+                    {
+
+                    }
+
+                    @Override
+                    public void onFrameAvailable(int var1)
+                    {
+
+                    }
+
+                    @Override
+                    public void onTangoEvent(TangoEvent var1)
+                    {
+
+                    }
+                }
+        );
+    }
 
     protected FrameLayout mFrameLayout = null;
     // ===========================================================
@@ -429,6 +426,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         tangoConfig = tango.getConfig(TangoConfig.CONFIG_TYPE_CURRENT);
         tangoConfig.putBoolean(TangoConfig.KEY_BOOLEAN_MOTIONTRACKING, true);
     }
+
     public Cocos2dxGLSurfaceView onCreateView() {
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         //this line is need on some device if we specify an alpha bits

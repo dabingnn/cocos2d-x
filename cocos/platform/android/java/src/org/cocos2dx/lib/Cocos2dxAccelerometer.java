@@ -138,6 +138,41 @@ public class Cocos2dxAccelerometer implements SensorEventListener {
     
     public static native void onSensorChanged(final float x, final float y, final float z, final long timestamp);
 
+    public static void onDeviceMoved(final float deltaX, final float deltaY, final float deltaZ)
+    {
+        Context context = Cocos2dxActivity.getContext();
+
+        final Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int naturalOrientation = display.getOrientation();
+
+        //convert to device coordinates.
+        float x = deltaX;
+        float y = deltaZ;
+        float z = -deltaY;
+//        float x = deltaX;
+//        float y = deltaY;
+//        float z = deltaZ;
+        final int orientation = context.getResources().getConfiguration().orientation;
+
+//        if ((orientation == Configuration.ORIENTATION_LANDSCAPE) && (naturalOrientation != Surface.ROTATION_0)) {
+//            final float tmp = x;
+//            x = -y;
+//            y = tmp;
+//        } else if ((orientation == Configuration.ORIENTATION_PORTRAIT) && (naturalOrientation != Surface.ROTATION_0)) {
+//            final float tmp = x;
+//            x = y;
+//            y = -tmp;
+//        }
+
+//        final String translationMsg = String.format("Translation: %f, %f, %f",
+//                x, y,z);
+//
+//        Log.i(String.valueOf(context.getApplicationContext()),translationMsg);
+
+        onDeviceMovedNative(x,y,z);
+    }
+
+    private static native void onDeviceMovedNative(final float deltaX, final float deltaY, final float deltaZ);
     // ===========================================================
     // Inner and Anonymous Classes
     // ===========================================================
